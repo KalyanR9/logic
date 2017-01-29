@@ -15,18 +15,18 @@ object JoinOption1 {
       .config("spark.sql.warehouse.dir", "file:///tmp")
       .config("spark.sql.shuffle.partitions", 100)
       .getOrCreate()
-    println("===============================Biegin JoinOption1=====================")
-    val inputFilePath = "testData/input/parquet1.txt"
-    val outPath = "testData/output/u"
-    val unused1Path = "testData/output/u1"
-    val unused2Path = "testData/output/u2"
-    val unused3Path = "testData/output/u3"
+    println("===============================Begin JoinOption1=====================")
+    val inputFilePath = "testData/input/"
+    val outPath = "testData/output/out"
+    val unused2Path = "testData/output/unused2"
+    val unused3Path = "testData/output/unused3"
+    val unused4Path = "testData/output/unused4"
 
-    val df1 = spark.read.schema(makeSchema("df1")).csv(inputFilePath)
-    val df2 = spark.read.schema(makeSchema("df2")).csv(inputFilePath)
-    val df3 = spark.read.schema(makeSchema("df3")).csv(inputFilePath)
-    val df4 = spark.read.schema(makeSchema("df4")).csv(inputFilePath)
-    val df5 = spark.read.schema(makeSchema("df5")).csv(inputFilePath)
+    val df1 = spark.read.schema(makeSchema("df1")).csv(inputFilePath + "file1.txt")
+    val df2 = spark.read.schema(makeSchema("df2")).csv(inputFilePath + "file2.txt")
+    val df3 = spark.read.schema(makeSchema("df3")).csv(inputFilePath + "file3.txt")
+    val df4 = spark.read.schema(makeSchema("df4")).csv(inputFilePath + "file4.txt")
+    val df5 = spark.read.schema(makeSchema("df5")).csv(inputFilePath + "file5.txt")
 
     println("===============================Start=====================")
 
@@ -45,9 +45,9 @@ object JoinOption1 {
     println("===============================End=====================")
 
     outDF.write.mode(SaveMode.Overwrite).csv(outPath)
-    unused2DF.write.mode(SaveMode.Overwrite).csv(unused1Path)
-    unused3DF.write.mode(SaveMode.Overwrite).csv(unused2Path)
-    unused4DF.write.mode(SaveMode.Overwrite).csv(unused3Path)
+    unused2DF.write.mode(SaveMode.Overwrite).csv(unused2Path)
+    unused3DF.write.mode(SaveMode.Overwrite).csv(unused3Path)
+    unused4DF.write.mode(SaveMode.Overwrite).csv(unused4Path)
     println("===============================complete JoinOption1=====================")
   }
 
