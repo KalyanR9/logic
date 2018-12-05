@@ -7,3 +7,115 @@
 	<classpathentry kind="output" path="bin"/>
 </classpath>
 
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    
+    var $button = $('.increment-btn');
+	var $counter = $('.counter');
+
+$button.click(function(){
+  $counter.val( parseInt($counter.val()) + 1 );
+});
+});
+
+</script>
+<style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+.button1 {
+    background-color:#73e600;
+    border: none;
+    color: white;
+    padding: 5px 5px;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+	border-radius: 12px;
+}
+
+.button2 {
+    background-color: #ff3300;
+    border: none;
+    color: white;
+    padding: 5px 5px;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+	border-radius: 12px;
+}
+
+.button3 {
+    background-color: #a6a6a6;
+    border: none;
+    color: white;
+    padding: 5px 5px;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+	border-radius: 12px;
+}
+.button {
+    border: none;
+    color: white;
+    padding: 15px 114px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+.button4 {border-radius: 12px;}
+</style>
+</head>
+<body>
+
+<h2>Table</h2>
+
+<table>
+<tr>
+    <input type="text" name="Match" value="0/0 Match "class="button button1 counter"/>
+	<input type="text" name="No Match" value="0/0 No Match "class="button button2 counter"/>
+	<input type="text" name="Unsure" value="0/0 Unsure"class="button button3 counter"/>
+    </tr>
+  <tr>
+    <th>Merchant Name</th>
+    <th>Address</th>
+    <th>State</th>
+	<th>City</th>
+	<th>Zip</th>
+  </tr>
+  <tr>
+    <td>Alfreds Futterkiste</td>
+    <td>Maria Anders</td>
+    <td>Germany</td>
+	<td>Germany</td>
+	<td>1111</td>
+  </tr>
+  <tr>
+    <td>Centro comercial Moctezuma</td>
+    <td>Francisco Chang</td>
+    <td>Mexico</td>
+	<td>Mexico City</td>
+	<td>2222</td>
+	  </tr>
+ </table>
+<input type="submit" name="Yes" value="Yes"class="button1 increment-btn"/>
+<input type="submit" name="No" value="No"class="button2"/>
+<input type="submit" name="Can't Say" value="Can't Say"class="button3"/>
+</body>
+</html>
