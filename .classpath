@@ -14,12 +14,41 @@
 <script>
 $(document).ready(function(){
     
-    var $button = $('.increment-btn');
-	var $counter = $('.counter');
+    var $button11 = $('.increment-btn1');
+	var $button22 = $('.increment-btn2');
+	var $button33 = $('.increment-btn3');
+	
+	var $counter1 = $('.counter1');
+	var $counter2 = $('.counter2');
+	var $counter3 = $('.counter3');
 
-$button.click(function(){
-  $counter.val( parseInt($counter.val()) + 1 );
-});
+$button11.click(function(){
+  $counter1.val( parseInt($counter1.val()) + 1 );
+  });
+$button22.click(function(){
+  $counter2.val( parseInt($counter2.val()) + 1 );
+  });
+$button33.click(function(){
+  $counter3.val( parseInt($counter3.val()) + 1 );
+  });
+  
+  var data;
+ $.getJSON("demo_ajax_json.json", function(result){
+ data = result;
+   var tr;
+for (var i = 0; i < 5; i++) {
+  tr = $('<tr/>');
+  tr.append("<td>" + data[i][0] + "</td>");
+  tr.append("<td>" + data[i][1] + "</td>");
+  tr.append("<td>" + data[i][2] + "</td>");
+  tr.append("<td>" + data[i][3] + "</td>");
+  tr.append("<td>" + data[i][4] + "</td>");
+  $('.tftable').append(tr);
+}
+    });
+			
+
+    
 });
 
 </script>
@@ -36,29 +65,9 @@ td, th {
     padding: 8px;
 }
 
-.button1 {
-    background-color:#73e600;
-    border: none;
-    color: white;
-    padding: 5px 5px;
-    text-align: center;
-    font-size: 16px;
-    cursor: pointer;
-	border-radius: 12px;
-}
+.button4 {border-radius: 12px;}
 
-.button2 {
-    background-color: #ff3300;
-    border: none;
-    color: white;
-    padding: 5px 5px;
-    text-align: center;
-    font-size: 16px;
-    cursor: pointer;
-	border-radius: 12px;
-}
-
-.button3 {
+.button5 {
     background-color: #a6a6a6;
     border: none;
     color: white;
@@ -67,55 +76,129 @@ td, th {
     font-size: 16px;
     cursor: pointer;
 	border-radius: 12px;
+	position: absolute;
+    left: 40%;
 }
+
+.tftable {display:inline-block; margin-top: 5px}
+.tftable th {padding: 8px;text-align:center; width:218px;}
+.tftable tr {width:218px; text-align:center;}
+.tftable td {padding: 8px;width:218px;text-align:center;}
+
+.tftable1 {display:inline-block; margin-top: 30px}
+.tftable1 th {padding: 8px;text-align:center;width:150px;}
+.tftable1 tr {width:150px; text-align:center;}
+.tables {display-inline-block;}
+
 .button {
     border: none;
     color: white;
-    padding: 15px 114px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
+    padding: 10px 10px;
     font-size: 16px;
-    margin: 4px 2px;
+    margin-top: 4px;
     cursor: pointer;
+	}
+
+.inputbold1 {
+   background-color:#73e600;
+   float: left; 
+   }
+
+   .inputbold2 {
+  background-color: #ff3300;
+   float: left; 
+   }
+    
+   .inputbold3 {
+  background-color: #a6a6a6;
+   float: left; 
+   }
+   
+* {
+  margin: 0;
 }
-.button4 {border-radius: 12px;}
+*:focus {
+    outline: none;
+}
+
+.wrapper:after {
+    content: "";
+    clear: both;
+    display: table;
+	
+}
+.wrapper input:not(:last-child) {
+    border-right: none; /* Prevent double borders */
+}
 </style>
 </head>
 <body>
 
 <h2>Table</h2>
 
-<table>
+<table >
 <tr>
-    <input type="text" name="Match" value="0/0 Match "class="button button1 counter"/>
-	<input type="text" name="No Match" value="0/0 No Match "class="button button2 counter"/>
-	<input type="text" name="Unsure" value="0/0 Unsure"class="button button3 counter"/>
-    </tr>
-  <tr>
-    <th>Merchant Name</th>
-    <th>Address</th>
-    <th>State</th>
-	<th>City</th>
-	<th>Zip</th>
-  </tr>
-  <tr>
-    <td>Alfreds Futterkiste</td>
-    <td>Maria Anders</td>
-    <td>Germany</td>
-	<td>Germany</td>
-	<td>1111</td>
-  </tr>
-  <tr>
-    <td>Centro comercial Moctezuma</td>
-    <td>Francisco Chang</td>
-    <td>Mexico</td>
-	<td>Mexico City</td>
-	<td>2222</td>
-	  </tr>
+ <div class="wrapper">
+     <span class="inline">
+	 <input type="text" name="Match" value="Match "class="button  inputbold1" style="text-align:right; size ="4"/>
+	 <input type="text" name="Match" value="0"class="button counter1 inputbold1" />
+	</span>
+  <span class="inline">
+	 <input type="text" name="Non Match" value="Non Match "class="button  inputbold2"style="text-align:right; size ="4"/>
+	 <input type="text" name="Match" value="0"class="button counter2 inputbold2"/>
+  </span>
+  <span class="inline">
+	 <input type="text" name="Unsure" value="Unsure "class="button  inputbold3"style="text-align:right; size ="4"/>
+	 <input type="text" name="Unsure" value="0"class="button counter3 inputbold3"/>
+  </span>
+ </div>
+ </tr>
+  
  </table>
-<input type="submit" name="Yes" value="Yes"class="button1 increment-btn"/>
-<input type="submit" name="No" value="No"class="button2"/>
-<input type="submit" name="Can't Say" value="Can't Say"class="button3"/>
+<table class="tftable">
+
+  <tr>
+    <th>Merchant_Name_Input</th>
+    <th>Address_Input</th>
+    <th>State_Input</th>
+	<th>City_Input</th>
+	<th>Zip_Input</th>
+  </tr>
+  
+ </table>
+ 
+ 
+ <table class="tftable1">
+  <tr>
+    <th>Merchant_Name_Database</th>
+    <th>Address_Database</th>
+    <th>State_Database</th>
+	<th>City_Database</th>
+	<th>Zip_Database</th>
+	<th>jaro_winkler_distance</th>
+  </tr>
+  <form>
+  <tr>
+    <td>SEVEN ELEVEN CAR WASH</td>
+    <td>1121 WEST AVENUE</td>
+    <td>IL</td>
+	<td>CHICAGO</td>
+	<td>70751</td>
+	<td>0.745386471</td>
+	<td width="3%"><input type="radio" name="yesno" class="increment-btn1"/></td>
+  </tr>
+  <tr>
+    <td>YUMMI CAFE EXPRE</td>
+    <td>YUMMI CAFE EXPRESS</td>
+    <td>LA</td>
+	<td>DENHAM SPRIN</td>
+	<td>70726</td>
+	<td>0.602784196</td>
+	<td width="3%"><input type="radio" name="yesno" class="increment-btn2"/></td>
+	</tr>
+</table>
+ 
+ <input type="button" name="Can't Say" value="Can't Say" class="button5 increment-btn3"/>
 </body>
 </html>
+
