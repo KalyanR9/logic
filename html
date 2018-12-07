@@ -1,0 +1,202 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    	var JSONItems = [];
+		$.get( "http://127.0.0.1:8887/data.json", function( data){
+		  JSONItems = data;
+		  console.log(JSONItems[0]);
+		  });
+		
+			
+	 
+   $.getJSON("http://127.0.0.1:8887/data.json", function(result){
+		
+		   $.each(result, function(i, elem){
+			if(i<1){
+			$('table.tftable').append('<tr><td>'+elem.Merchant_Name_Input+'</td><td>'+elem.Address_Input +'</td><td>'+elem.State_Input +'</td><td>'+elem.City_Input +'</td><td>'+elem.Zip_Input +'</td></tr>');
+                }
+            });
+        });
+
+
+		$.getJSON("http://127.0.0.1:8887/data.json", function(result){
+            $.each(result, function(i, elem){
+			if(i<2){
+			$('table.tftable1').append('<tr><td>'+elem.Merchant_Name_Input+'</td><td>'+elem.Address_Input +'</td><td>'+elem.State_Input +'</td><td>'+elem.City_Input +'</td><td>'+elem.Zip_Input +'</td><td>'+elem.Zip_Input +'</td><td width="3%"><input type="radio" name="yesno" class="increment-btn'+i+'"/></td></tr>');
+			
+                }
+            });
+        });
+		
+	var $button11 = $('.increment-btn0');
+	var $button22 = $('.increment-btn1');
+	var $button33 = $('.increment-btn3');
+	
+	var $counter1 = $('.counter1');
+	var $counter2 = $('.counter2');
+	var $counter3 = $('.counter3');
+
+$button11.click(function(){
+  $counter1.val( parseInt($counter1.val()) + 1 );
+  });
+$button22.click(function(){
+  $counter2.val( parseInt($counter2.val()) + 1 );
+  });
+$button33.click(function(){
+  $counter3.val( parseInt($counter3.val()) + 1 );
+  });
+    
+	
+	$button33.click(function(){
+	
+		var par = $('table.tftable1 td').parent(); //tr
+		par.remove();
+        var tr;
+			for (var i = 0; i < JSONItems.length-(JSONItems.length-2); i++) {
+			  tr = $('<tr/>');
+			  tr.append("<td>" + JSONItems[i].Merchant_Name_Input + "</td>");
+			  tr.append("<td>" + JSONItems[i].Address_Input + "</td>");
+			  tr.append("<td>" + JSONItems[i].State_Input + "</td>");
+			  tr.append("<td>" + JSONItems[i].City_Input + "</td>");
+			  tr.append("<td>" + JSONItems[i].Zip_Input + "</td>");
+			  $('.tftable1').append(tr);
+			  JSONItems.splice(i, 1);
+			}
+    });
+});
+
+  
+</script>
+<style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+.button4 {border-radius: 12px;}
+
+.button5 {
+    background-color: #a6a6a6;
+    border: none;
+    color: white;
+    padding: 5px 5px;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+	border-radius: 12px;
+	position: absolute;
+    left: 40%;
+	bottom : 50%
+}
+
+.tftable {display:inline-block; margin-top: 5px}
+.tftable th {padding: 8px;text-align:center; width:218px;}
+.tftable tr {width:218px; text-align:center;}
+.tftable td {padding: 8px;width:218px;text-align:center;}
+
+.tftable1 {display:inline-block; margin-top: 30px}
+.tftable1 th {padding: 8px;text-align:center;width:150px;}
+.tftable1 tr {width:150px; text-align:center;}
+.tables {display-inline-block;}
+
+.button {
+    border: none;
+    color: white;
+    padding: 10px 10px;
+    font-size: 16px;
+    margin-top: 4px;
+    cursor: pointer;
+	}
+
+.inputbold1 {
+   background-color:#73e600;
+   float: left; 
+   }
+
+   .inputbold2 {
+  background-color: #ff3300;
+   float: left; 
+   }
+    
+   .inputbold3 {
+  background-color: #a6a6a6;
+   float: left; 
+   }
+   
+* {
+  margin: 0;
+}
+*:focus {
+    outline: none;
+}
+
+.wrapper:after {
+    content: "";
+    clear: both;
+    display: table;
+	
+}
+.wrapper input:not(:last-child) {
+    border-right: none; 
+	}
+</style>
+</head>
+<body>
+
+<h2>Table</h2>
+
+<table >
+<tr>
+ <div class="wrapper">
+     <span class="inline">
+	 <input type="text" name="Match" value="Match "class="button  inputbold1" style="text-align:right; size ="4"/>
+	 <input type="text" name="Match" value="0"class="button counter1 inputbold1" />
+	</span>
+  <span class="inline">
+	 <input type="text" name="Non Match" value="Non Match "class="button  inputbold2"style="text-align:right; size ="4"/>
+	 <input type="text" name="Match" value="0"class="button counter2 inputbold2"/>
+  </span>
+  <span class="inline">
+	 <input type="text" name="Unsure" value="Unsure "class="button  inputbold3"style="text-align:right; size ="4"/>
+	 <input type="text" name="Unsure" value="0"class="button counter3 inputbold3"/>
+  </span>
+ </div>
+ </tr>
+  
+ </table>
+<table class="tftable">
+
+  <tr>
+    <th>Merchant_Name_Input</th>
+    <th>Address_Input</th>
+    <th>State_Input</th>
+	<th>City_Input</th>
+	<th>Zip_Input</th>
+  </tr>
+ </table>
+  
+ <table class="tftable1">
+  <tr>
+    <th>Merchant_Name_Database</th>
+    <th>Address_Database</th>
+    <th>State_Database</th>
+	<th>City_Database</th>
+	<th>Zip_Database</th>
+	<th>jaro_winkler_distance</th>
+  </tr>
+  
+  
+</table>
+ 
+ <input type="button" name="Can't Say" value="Can't Say" class="button5 increment-btn3"/>
+</body>
+</html>
