@@ -3,73 +3,101 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
 $(document).ready(function(){
-    	var JSONItems = [];
-		$.get( "http://127.0.0.1:8887/data.json", function( data){
-		  JSONItems = data;
-		  console.log(JSONItems[0]);
-		  });
-		
-			
-	 
+    var JSONItems = [];
+	var JSONItemsfordb = [];
+	var cantSayCount = 0;
+	var yesCount = 0;
+	var noCount = 0;
+	
    $.getJSON("http://127.0.0.1:8887/data.json", function(result){
-		
+		JSONItems = result;
+		 console.log(JSONItems[0]);
 		   $.each(result, function(i, elem){
 			if(i<1){
 			$('table.tftable').append('<tr><td>'+elem.Merchant_Name_Input+'</td><td>'+elem.Address_Input +'</td><td>'+elem.State_Input +'</td><td>'+elem.City_Input +'</td><td>'+elem.Zip_Input +'</td></tr>');
-                }
+                JSONItems.splice(0, 1);
+				}
             });
         });
 
-
-		$.getJSON("http://127.0.0.1:8887/data.json", function(result){
+		$.getJSON("http://127.0.0.1:8887/data_db.json", function(result){
+		JSONItemsfordb = result;
+		 console.log(JSONItemsfordb[0]);
             $.each(result, function(i, elem){
 			if(i<2){
-			$('table.tftable1').append('<tr><td>'+elem.Merchant_Name_Input+'</td><td>'+elem.Address_Input +'</td><td>'+elem.State_Input +'</td><td>'+elem.City_Input +'</td><td>'+elem.Zip_Input +'</td><td>'+elem.Zip_Input +'</td><td width="3%"><input type="radio" name="yesno" class="increment-btn'+i+'"/></td></tr>');
+			$('table.tftable1').append('<tr><td>'+elem.Merchant_Name_Input+'</td><td>'+elem.Address_Input +'</td><td>'+elem.State_Input +'</td><td>'+elem.City_Input +'</td><td>'+elem.Zip_Input +'</td><td>'+elem.jaro_winkler_distance +'</td></tr>');
 			
-                }
+			}
             });
         });
 		
-	var $button11 = $('.increment-btn0');
-	var $button22 = $('.increment-btn1');
-	var $button33 = $('.increment-btn3');
-	
-	var $counter1 = $('.counter1');
-	var $counter2 = $('.counter2');
-	var $counter3 = $('.counter3');
-
-$button11.click(function(){
-  $counter1.val( parseInt($counter1.val()) + 1 );
-  });
-$button22.click(function(){
-  $counter2.val( parseInt($counter2.val()) + 1 );
-  });
-$button33.click(function(){
-  $counter3.val( parseInt($counter3.val()) + 1 );
-  });
+		var $button11 = $('.increment-yes');
+		var $button22 = $('.increment-no');
+		var $button33 = $('.increment-cantsay');
+		
+		var $counter1 = $('.counter1');
+		var $counter2 = $('.counter2');
+		var $counter3 = $('.counter3');
+		  
+		$button11.click(function(){
+		yesCount =  parseInt($counter1.val()) + 1;
+		  $counter1.val(yesCount );
+		  updateRowFunction();
+		  });
     
-	
-	$button33.click(function(){
-	
-		var par = $('table.tftable1 td').parent(); //tr
-		par.remove();
-        var tr;
-			for (var i = 0; i < JSONItems.length-(JSONItems.length-2); i++) {
+		$button22.click(function(){
+		noCount =  parseInt($counter2.val()) + 1 ;
+		  $counter2.val(noCount);
+		  updateRowFunction();
+		  });
+		  
+		$button33.click(function(){
+		cantSayCount = parseInt($counter3.val()) + 1;
+		  $counter3.val( cantSayCount );
+		  updateRowFunction();
+		  });
+		  
+			function updateRowFunction(){
+			
+			if(JSONItems.length>0){
+			var par = $('table.tftable td').parent(); //tr
+			par.remove();
+			var tr;
+			for (var i = 0; i < JSONItems.length-(JSONItems.length-1); i++) {
 			  tr = $('<tr/>');
 			  tr.append("<td>" + JSONItems[i].Merchant_Name_Input + "</td>");
 			  tr.append("<td>" + JSONItems[i].Address_Input + "</td>");
 			  tr.append("<td>" + JSONItems[i].State_Input + "</td>");
 			  tr.append("<td>" + JSONItems[i].City_Input + "</td>");
 			  tr.append("<td>" + JSONItems[i].Zip_Input + "</td>");
-			  $('.tftable1').append(tr);
+			  $('.tftable').append(tr);
 			  JSONItems.splice(i, 1);
+				}
 			}
-    });
+		
+		if(JSONItemsfordb.length>0){		
+		var pardb = $('table.tftable1 td').parent(); //tr
+		pardb.remove();
+        var trdb;
+			for (var i = 0; i < JSONItemsfordb.length-(JSONItemsfordb.length-2); i++) {
+			  trdb = $('<tr/>');
+			  trdb.append("<td>" + JSONItemsfordb[i].Merchant_Name_Input + "</td>");
+			  trdb.append("<td>" + JSONItemsfordb[i].Address_Input + "</td>");
+			  trdb.append("<td>" + JSONItemsfordb[i].State_Input + "</td>");
+			  trdb.append("<td>" + JSONItemsfordb[i].City_Input + "</td>");
+			  trdb.append("<td>" + JSONItemsfordb[i].Zip_Input + "</td>");
+			  trdb.append("<td>" + JSONItemsfordb[i].jaro_winkler_distance + "</td>");
+			  $('.tftable1').append(trdb);
+			  JSONItemsfordb.splice(i, 1);
+			 }
+		}
+	}
+			
 });
-
-  
+ 
 </script>
 <style>
+
 table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
@@ -84,34 +112,67 @@ td, th {
 
 .button4 {border-radius: 12px;}
 
-.button5 {
-    background-color: #a6a6a6;
+.btn-group button {
     border: none;
     color: white;
-    padding: 5px 5px;
+    padding: 5px 10px;
     text-align: center;
     font-size: 16px;
     cursor: pointer;
 	border-radius: 12px;
 	position: absolute;
-    left: 40%;
-	bottom : 50%
+    bottom : 60%
 }
 
-.tftable {display:inline-block; margin-top: 5px}
-.tftable th {padding: 8px;text-align:center; width:218px;}
-.tftable tr {width:218px; text-align:center;}
-.tftable td {padding: 8px;width:218px;text-align:center;}
+/* Clear floats (clearfix hack) */
+.btn-group:after {
+    content: "";
+    clear: both;
+    display: table;
+}
 
-.tftable1 {display:inline-block; margin-top: 30px}
-.tftable1 th {padding: 8px;text-align:center;width:150px;}
-.tftable1 tr {width:150px; text-align:center;}
-.tables {display-inline-block;}
+.btn-group button:not(:last-child) {
+    border-right: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.btn-group button:hover {
+    background-color: #3e8e41;
+}
+
+.cantsay {
+    background-color: #a6a6a6;
+   	left: 47%;
+}
+.no {
+    background-color: #ff3300;
+	left: 40%;
+}
+.yes {
+    background-color: #73e600;
+	left: 35%;
+}
+
+
+.tftable { margin-top: 5px;display: inline-block;}
+.tftable1 { margin-top: 30px;display: inline-block;}
+
+.table-grp th {text-align:center}
+.table-grp tr {text-align:center}
+.table-grp td {padding: 8px;text-align:center;table-layout:fixed;overflow:hidden;word-wrap:break-word;}
+ 
+table.tftable1 td {width:190px}
+
+table.tftable td:nth-of-type(1) {width:210px}
+table.tftable td:nth-of-type(2) {width:190px}
+table.tftable td:nth-of-type(3) {width:180px}
+table.tftable td:nth-of-type(4) {width:195px}
+table.tftable td:nth-of-type(5) {width:400px}
 
 .button {
     border: none;
     color: white;
-    padding: 10px 10px;
+    padding: 10px 17px;
     font-size: 16px;
     margin-top: 4px;
     cursor: pointer;
@@ -143,11 +204,12 @@ td, th {
     content: "";
     clear: both;
     display: table;
-	
+	margin-l: 4px;
 }
 .wrapper input:not(:last-child) {
     border-right: none; 
 	}
+
 </style>
 </head>
 <body>
@@ -173,6 +235,7 @@ td, th {
  </tr>
   
  </table>
+<div class="table-grp"> 
 <table class="tftable">
 
   <tr>
@@ -193,10 +256,13 @@ td, th {
 	<th>Zip_Database</th>
 	<th>jaro_winkler_distance</th>
   </tr>
-  
-  
+    
 </table>
- 
- <input type="button" name="Can't Say" value="Can't Say" class="button5 increment-btn3"/>
+</div>
+<div class="btn-group">
+  <button class= "yes increment-yes">Match</button>
+  <button class= "no increment-no">No Match</button>
+  <button class= "cantsay increment-cantsay">Unsure</button>
+ </div>
 </body>
 </html>
