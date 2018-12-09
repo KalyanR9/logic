@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<!-- If IE use the latest rendering engine -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<!-- Set the page to the width of the device and set the zoon level -->
+<meta name="viewport" content="width = device-width, initial-scale = 1">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+$(document).ready(function(){
+    var JSONItems = [];
+	var JSONItemsfordb = [];
+	var cantSayCount = 0;
+	var yesCount = 0;
+	var noCount = 0;
+	
+   $.getJSON("http://127.0.0.1:8887/data.json", function(result){
+		JSONItems = result;
+		JSONItems.push(JSONItems[JSONItems.length-1])
+		 console.log(JSONItems[JSONItems.length-1]);
+		   $.each(result, function(i, elem){
+			if(i<1){
+			$('table.tftable').append('<tr><td>'+elem.Merchant_Name_Input+'</td><td>'+elem.Address_Input +'</td><td>'+elem.State_Input +'</td><td>'+elem.City_Input +'</td><td>'+elem.Zip_Input +'</td></tr>');
+                
+				}
+            });
+        });
+
+		$.getJSON("http://127.0.0.1:8887/data_db.json", function(result){
+		JSONItemsfordb = result;
+		JSONItemsfordb.push(JSONItemsfordb[JSONItemsfordb.length-2])
+		JSONItemsfordb.push(JSONItemsfordb[JSONItemsfordb.length-2])
+		 console.log(JSONItemsfordb.length);
+            $.each(result, function(i, elem){
+			if(i<2){
+			$('table.tftable1').append('<tr><td>'+elem.Merchant_Name_Input+'</td><td>'+elem.Address_Input +'</td><td>'+elem.State_Input +'</td><td>'+elem.City_Input +'</td><td>'+elem.Zip_Input +'</td><td>'+elem.jaro_winkler_distance +'</td></tr>');
+			
+			}
+            });
+        });
+		
+		var $button11 = $('.increment-yes');
+		var $button22 = $('.increment-no');
+		var $button33 = $('.increment-cantsay');
+		
+		var $counter1 = $('.counter1');
+		var $counter2 = $('.counter2');
+		var $counter3 = $('.counter3');
+		  
+		$button11.click(function(){
+			if(updateRowFunction()){
+		yesCount =  parseInt($counter1.val()) + 1;
+		  $counter1.val(yesCount );
+		  	}
+		  });
+    
+		$button22.click(function(){
+			if(updateRowFunction()){
+		noCount =  parseInt($counter2.val()) + 1 ;
+		  $counter2.val(noCount);
+				}
+		  });
+		  
+		$button33.click(function(){
+			if(updateRowFunction()){
+
+		cantSayCount = parseInt($counter3.val()) + 1;
+		  $counter3.val( cantSayCount );
+				}
+		  });
+		  
+			function updateRowFunction(){
+			if(JSONItems.length>1 && JSONItemsfordb.length>2){
+				$("table.tftable").fadeOut("3000");
+				$("table.tftable1 ").fadeOut("3000").fadeIn("3000");
+
+			var par = $('table.tftable td').parent(); //tr
+			par.remove();
+			JSONItems.splice(0, 1);
+			var tr;
+			for (var i = 0; i < JSONItems.length-(JSONItems.length-1); i++) {
+			  tr = $('<tr/>');
+			  tr.append("<td class='cls'>" + JSONItems[i].Merchant_Name_Input + "</td>");
+			  tr.append("<td>" + JSONItems[i].Address_Input + "</td>");
+			  tr.append("<td>" + JSONItems[i].State_Input + "</td>");
+			  tr.append("<td>" + JSONItems[i].City_Input + "</td>");
+			  tr.append("<td>" + JSONItems[i].Zip_Input + "</td>");
+			  $('.tftable').append(tr);
+			}
+		
+		$("table.tftable").fadeIn("3000");
+		var pardb = $('table.tftable1 td').parent(); //tr
+		pardb.remove();
+		JSONItemsfordb.splice(0, 2);
+        var trdb;
+			for (var i = 0; i < JSONItemsfordb.length-(JSONItemsfordb.length-2); i++) {
+			  trdb = $('<tr/>');
+			  trdb.append("<td>" + JSONItemsfordb[i].Merchant_Name_Input + "</td>");
+			  trdb.append("<td>" + JSONItemsfordb[i].Address_Input + "</td>");
+			  trdb.append("<td>" + JSONItemsfordb[i].State_Input + "</td>");
+			  trdb.append("<td>" + JSONItemsfordb[i].City_Input + "</td>");
+			  trdb.append("<td>" + JSONItemsfordb[i].Zip_Input + "</td>");
+			  trdb.append("<td>" + JSONItemsfordb[i].jaro_winkler_distance + "</td>");
+			  $('.tftable1').append(trdb);
+			 }
+		return true;
+	}
+	
+	else{
+		return false;
+	}
+}
+
+ });
+</script>
+<style>
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: center;
+    padding: 8px;
+}
+
+.cantsay {
+    background-color: #808080;
+   	
+}
+.no {
+    background-color: #cb3434;
+	
+}
+.yes {
+    background-color: #a5cb34;
+	
+}
+
+
+.tftable { margin-top: 5px;display: inline-block;}
+.tftable1 { margin-top: 30px;display: inline-block;}
+
+
+table.tftable1 td {width:190px}
+
+table.tftable td:nth-of-type(1) {width:210px}
+table.tftable td:nth-of-type(2) {width:190px}
+table.tftable td:nth-of-type(3) {width:180px}
+table.tftable td:nth-of-type(4) {width:195px}
+table.tftable td:nth-of-type(5) {width:400px}
+
+.button {
+    border: none;
+    color: white;
+    padding: 10px 0px;
+    font-size: 14px;
+    margin-top: 4px;
+    cursor: pointer;
+	}
+
+.inputbold1 {
+   background-color:#a5cb34;
+   float: left; 
+  
+   }
+
+   .inputbold2 {
+  background-color: #cb3434;
+   float: left; 
+   }
+    
+   .inputbold3 {
+  background-color: #808080;
+   float: left; 
+   }
+   
+* {
+  margin: 0;
+}
+*:focus {
+    outline: none;
+}
+
+.wrapper:after {
+    content: "";
+    clear: both;
+    display: table;
+	margin-l: 4px;
+}
+.wrapper input:not(:last-child) {
+    border-right: none; 
+	}
+
+.jumbotron{
+    background-color:#ecffe5;
+    color:black;
+}
+</style>
+</head>
+<body>
+
+<div class = "container">
+
+<div class = "page-header">
+<h2>Table</h2>
+</div>
+<div class = "jumbotron">
+
+ <div class="wrapper">
+     <span class="inline">
+	 <input type="text" name="Match" value="Match "class="button  inputbold1" style="text-align:right; size =4;border-top-left-radius: 15px;
+   border-bottom-left-radius: 15px;"/>
+	 <input type="text" name="Match" value="0"class="button counter1 inputbold1" style="border-top-right-radius: 15px;
+   border-bottom-right-radius: 15px;/>
+
+	</span>
+  <span class="inline">
+	 <input type="text" name="Non Match" value="Non Match "class="button  inputbold2"style="text-align:right; size =4;text-align:right; size =4;border-top-left-radius: 15px;
+   border-bottom-left-radius: 15px;"/>
+	 <input type="text" name="Match" value="0"class="button counter2 inputbold2" style="border-top-right-radius: 15px;
+   border-bottom-right-radius: 15px;/>
+  </span>
+  <span class="inline">
+	 <input type="text" name="Unsure" value="Unsure "class="button  inputbold3" style="text-align:right; size =4;text-align:right; size =4;border-top-left-radius: 15px;
+   border-bottom-left-radius: 15px;"/>
+	 <input type="text" name="Unsure" value="0"class="button counter3 inputbold3" style="border-top-right-radius: 15px;
+   border-bottom-right-radius: 15px;" />
+  </span>
+ </div>
+
+<div class="table-grp"> 
+<table class="tftable">
+  <tr>
+    <th>Merchant_Name_Input</th>
+    <th>Address_Input</th>
+    <th>State_Input</th>
+	<th>City_Input</th>
+	<th>Zip_Input</th>
+  </tr>
+ </table>
+  
+ <table class="tftable1">
+  <tr>
+    <th>Merchant_Name_Database</th>
+    <th>Address_Database</th>
+    <th>State_Database</th>
+	<th>City_Database</th>
+	<th>Zip_Database</th>
+	<th>jaro_winkler_distance</th>
+  </tr>
+    
+</table>
+</div>
+  
+  <div class="text-center" role="group">
+  <button type="button" class="btn btn-default increment-yes yes">Match</button>
+  <button type="button" class="btn btn-default increment-no no">No Match</button>
+  <button type="button" class="btn btn-default cantsay increment-cantsay">Unsure</button>
+  </div>
+ </div>
+ </div>
+</body>
+</html>
