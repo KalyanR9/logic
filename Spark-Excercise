@@ -1,0 +1,63 @@
+Map vs mapPartions
+map works the function being utilized at a per element level while mapPartitions exercises the function at the partition level.
+val newRd = myRdd.mapPartitions(partition => {
+  val connection  =  new DbConnection /*creates a db connection per partition*/
+  val newPartition  =  partition.map(record => {
+    readMatchingFromDB(record, connection)
+  }).toList // consumes the iterator, thus calls readMatchingFromDB 
+  connection.close() // close dbconnection here
+  newPartition.iterator // create a new iterator
+})
+Example Scenario: if we have 100K elements in a particular RDD partition then we will fire off the function being used by the mapping transformation 100K times when we use map.
+Conversely, if we use mapPartitions then we will only call the particular function one time, but we will pass in all 100K records and get back all responses in one function call.
+There will be performance gain since map works on a particular function so many times, especially if the function is doing something expensive each time that it wouldn't need to do if we passed in all the elements at once(in case of mappartitions).
+
+Hive Bucketing in Apache Spark
+https://databricks.com/session/hive-bucketing-in-apache-spark
+https://jaceklaskowski.gitbooks.io/mastering-spark-sql/spark-sql-bucketing.html
+Bucketing is a partitioning technique that can improve performance in certain data transformations by avoiding data shuffling and sorting. The general idea of bucketing is to partition, and optionally sort, the data based on a subset of columns while it is written out (a one-time cost), while making successive reads of the data more performant for downstream jobs if the SQL operators can make use of this property. Bucketing can enable faster joins (i.e. single stage sort merge join), the ability to short circuit in FILTER operation if the file is pre-sorted over the column in a filter predicate, and it supports quick data sampling.
+In this session, you’ll learn how bucketing is implemented in both Hive and Spark. In particular, Patil will describe the changes in the Catalyst optimizer that enable these optimizations in Spark for various bucketing scenarios. Facebook’s performance tests have shown bucketing to improve Spark performance from 3-5x faster when the optimization is enabled. Many tables at Facebook are sorted and bucketed, and migrating these workloads to Spark have resulted in a 2-3x savings when compared to Hive. You’ll also hear about real-world applications of bucketing, like loading of cumulative tables with daily delta, and the characteristics that can help identify suitable candidate jobs that can benefit from bucketing.
+
+Cache vs Persist
+Cache and Persist both are optimization techniques for Spark computations.
+Cache is a synonym of Persist with MEMORY_ONLY storage level(i.e) using Cache technique we can save intermediate results in memory only when needed.
+Persist marks an RDD for persistence using storage level which can be MEMORY, MEMORY_AND_DISK, MEMORY_ONLY_SER, MEMORY_AND_DISK_SER, DISK_ONLY, MEMORY_ONLY_2, MEMORY_AND_DISK_2
+Just because you can cache an RDD in memory doesn’t mean you should blindly do so. Depending on how many times the dataset gets accessed and the amount of work involved in doing so, recomputation can be faster by the increased memory pressure.
+It should go without saying that if you only read a dataset once there is no point in caching it, it will actually make your job slower.
+partition vs bucketing
+https://github.com/vaquarkhan/Apache-Kafka-poc-and-notes/wiki/What-is-the-difference-between-partitioning-and-bucketing-a-table-in-Hive-%3F
+Partitioning data is often used for distributing load horizontally, this has performance benefit, and helps in organizing data in a logical fashion. Partitioning tables changes how Hive structures the data storage and Hive will now create subdirectories reflecting the partitioning structure like.
+Drawback:
+too many partitions may optimize some queries, but be detrimental for other important queries and is the large number of Hadoop files and directories that are created unnecessarily and overhead to NameNode since it must keep all metadata for the file system in memory.
+Bucketing is another technique for decomposing data sets into more manageable parts. For example, suppose a table using date as the top-level partition and employee_id as the second-level partition leads to too many small partitions. Instead, if we bucket the employee table and use employee_id as the bucketing column, the value of this column will be hashed by a user-defined number into buckets. Records with the same employee_id will always be stored in the same bucket. Assuming the number of employee_id is much greater than the number of buckets, each bucket will have many employee_id. While creating table you can specify like CLUSTERED BY (employee_id) INTO XX BUCKETS; where XX is the number of buckets . Bucketing has several advantages. The number of buckets is fixed so it does not fluctuate with data. If two tables are bucketed by employee_id, Hive can create a logically correct sampling. Bucketing also aids in doing efficient map-side joins etc.
+Spark Datasets and type-safety
+def computeStuff(df: DataFrame): DataFrame
+Without a good documentation, it is impossible to know:
+what are the required columns in the input DataFrame?
+what are the columns added to the output DataFrame?
+what are the types of the input/output columns: are they String, Double, Int?
+
+ORC, Avro and Parquet File Formats
+
+1) AVRO:-
+•	It is row major format.
+•	Its primary design goal was schema evolution.
+•	In the avro format, we store schema separately from data. Generally avro schema file (.avsc) is maintained.
+2) ORC
+•	Column oriented storage format.
+•	Originally it is Hive's Row Columnar file. Now improved as Optimized RC (ORC)
+•	Schema is with the data, but as a part of footer.
+•	Data is stored as row groups and stripes.
+•	Each stripe maintains indexes and stats about data it stores.
+3) Parquet
+•	Similar to ORC. Based on google dremel
+•	Schema stored in footer
+•	Column oriented storage format
+•	Has integrated compression and indexes
+Space or compression wise I found them pretty close to each other
+Around 10 GB of CSV data compressed to 1.1 GB of ORC with ZLIB compression and same data to 1.2 GB of Parquet GZIP. Both file formats with SNAPPY compression, used around 1.6 GB of space.
+Conversion speed wise ORC was little better it took 9 min where as parquet took 10 plus min.
+
+
+
+
