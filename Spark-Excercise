@@ -1,3 +1,1043 @@
+1.)	Understanding Apache Spark Architecture
+
+ 
+Spark Architecture Diagram – Overview of Apache Spark Cluster
+
+Apache Spark has a well-defined and layered architecture where all the spark components and layers are loosely coupled and integrated with various extensions and libraries. Apache Spark Architecture is based on two main abstractions-
+
+•	Resilient Distributed Datasets (RDD)
+•	Directed Acyclic Graph (DAG)
+
+Spark Architecture Overview
+Apache Spark follows a master/slave architecture with two main daemons and a cluster manager –
+i.	Master Daemon – (Master/Driver Process)
+ii.	Worker Daemon –(Slave Process)
+A spark cluster has a single Master and any number of Slaves/Workers. The driver and the executors run their individual Java processes and users can run them on the same horizontal spark cluster or on separate machines i.e. in a vertical spark cluster or in mixed machine configuration.
+Role of Driver in Spark Architecture
+Spark Driver – Master Node of a Spark Application
+ It is the central point and the entry point of the Spark Shell (Scala, Python, and R). The driver program runs the main () function of the application and is the place where the Spark Context is created. Spark Driver contains various components – DAGScheduler, TaskScheduler, BackendScheduler and BlockManager responsible for the translation of spark user code into actual spark jobs executed on the cluster.
+•	The driver program that runs on the master node of the spark cluster schedules the job execution and negotiates with the cluster manager.
+•	It translates the RDD’s into the execution graph and splits the graph into multiple stages.
+•	Driver stores the metadata about all the Resilient Distributed Databases and their partitions.
+•	Cockpits of Jobs and Tasks Execution -Driver program converts a user application into smaller execution units known as tasks. Tasks are then executed by the executors i.e. the worker processes which run individual tasks.
+•	Driver exposes the information about the running spark application through a Web UI at port 4040.
+
+Role of Executor in Spark Architecture
+Executor is a distributed agent responsible for the execution of tasks. Every spark applications has its own executor process. Executors usually run for the entire lifetime of a Spark application and this phenomenon is known as “Static Allocation of Executors”. However, users can also opt for dynamic allocations of executors wherein they can add or remove spark executors dynamically to match with the overall workload.
+•	Executor performs all the data processing.
+•	Reads from and Writes data to external sources.
+•	Executor stores the computation results data in-memory, cache or on hard disk drives.
+•	Interacts with the storage systems.
+Role of Cluster Manager in Spark Architecture
+An external service responsible for acquiring resources on the spark cluster and allocating them to a spark job. There are 3 different types of cluster managers a Spark application can leverage for the allocation and deallocation of various physical resources such as memory for client spark jobs, CPU memory, etc. Hadoop YARN, Apache Mesos or the simple standalone spark cluster manager either of them can be launched on-premise or in the cloud for a spark application to run.
+Choosing a cluster manager for any spark application depends on the goals of the application because all cluster managers provide different set of scheduling capabilities. To get started with apache spark, the standalone cluster manager is the easiest one to use when developing a new spark application.
+Understanding the Run Time Architecture of a Spark Application
+What happens when a Spark Job is submitted?
+When a client submits a spark user application code, the driver implicitly converts the code containing transformations and actions into a logical directed acyclic graph (DAG). At this stage, the driver program also performs certain optimizations like pipelining transformations and then it converts the logical DAG into physical execution plan with set of stages. After creating the physical execution plan, it creates small physical execution units referred to as tasks under each stage. Then tasks are bundled to be sent to the Spark Cluster.
+The driver program then talks to the cluster manager and negotiates for resources. The cluster manager then launches executors on the worker nodes on behalf of the driver. At this point the driver sends tasks to the cluster manager based on data placement. Before executors begin execution, they register themselves with the driver program so that the driver has holistic view of all the executors. Now executors start executing the various tasks assigned by the driver program. At any point of time when the spark application is running, the driver program will monitor the set of executors that run. Driver program in the spark architecture also schedules future tasks based on data placement by tracking the location of cached data. When driver programs main () method exits or when it call the stop () method of the Spark Context, it will terminate all the executors and release the resources from the cluster manager.
+The structure of a Spark program at higher level is - RDD's are created from the input data and new RDD's are derived from the existing RDD's using different transformations, after which an action is performed on the data. In any spark program, the DAG operations are created by default and whenever the driver runs the Spark DAG will be converted into a physical execution plan.
+Launching a Spark Program
+spark-submit is the single script used to submit a spark program and launches the application on the cluster. There are multiple options through which spark-submit script can connect with different cluster managers and control on the number of resources the application gets. For few cluster managers, spark-submit can run the driver within the cluster like in YARN on worker node whilst for others it runs only on local machines.
+
+2.)	Learn SparkContext – Introduction and Functions
+. Objective
+SparkContext is the entry gate of Apache Spark functionality. The most important step of any Spark driver application is to generate SparkContext. It allows your Spark Application to access Spark Cluster with the help of Resource Manager (YARN/Mesos). To create SparkContext, first SparkConf should be made. The SparkConf has a configuration parameter that our Spark driver application will pass to SparkContext.
+In this Apache Spark tutorial, we will deeply understand what is SparkContext in Spark. How to create SparkContext Class in Spark with the help of Spark-Scala word count program. We will also learn various tasks of SparkContext and how to stop SparkContext in Apache Spark.
+So, let’s start SparkContext tutorial.
+ 
+Learn SparkContext – Introduction and Functions
+Learn how to install Apache Spark in standalone mode and Apache Spark installation in a multi-node cluster.
+2. What is SparkContext in Apache Spark?
+SparkContext is the entry point of Spark functionality. The most important step of any Spark driver application is to generate SparkContext. It allows your Spark Application to access Spark Cluster with the help of Resource Manager. The resource manager can be one of these three- Spark Standalone, YARN, Apache Mesos.
+3. How to Create SparkContext Class?
+If you want to create SparkContext, first SparkConf should be made. The SparkConf has a configuration parameter that our Spark driver application will pass to SparkContext. Some of these parameter defines properties of Spark driver application. While some are used by Spark to allocate resources on the cluster, like the number, memory size, and cores used by executor running on the worker nodes.
+In short, it guides how to access the Spark cluster. After the creation of a SparkContext object, we can invoke functions such as textFile, sequenceFile, parallelize etc. The different contexts in which it can run are local, yarn-client, Mesos URL and Spark URL.
+Once the SparkContext is created, it can be used to create RDDs, broadcast variable, and accumulator, ingress Spark service and run jobs. All these things can be carried out until SparkContext is stopped.
+4. Stopping SparkContext
+Only one SparkContext may be active per JVM. You must stop the active it before creating a new one as below:
+stop(): Unit
+It will display the following message:
+INFO SparkContext: Successfully stopped SparkContext
+5. Spark Scala Word Count Example
+Let’s see how to create SparkContext using SparkConf with the help of Spark-Scala word count example-
+1.	package com.dataflair.spark
+2.	import org.apache.spark.SparkContext
+3.	import org.apache.spark.SparkConf
+4.	object Wordcount {
+5.	def main(args: Array[String]) {
+6.	//Create conf object
+7.	val conf = new SparkConf()
+8.	.setAppName("WordCount")
+9.	//create spark context object
+10.	val sc = new SparkContext(conf)
+11.	//Check whether sufficient params are supplied
+12.	if (args.length < 2) {
+13.	println("Usage: ScalaWordCount <input> <output>")
+14.	System.exit(1)
+15.	}
+16.	//Read file and create RDD
+17.	val rawData = sc.textFile(args(0))
+18.	//convert the lines into words using flatMap operation
+19.	val words = rawData.flatMap(line => line.split(" "))
+20.	//count the individual words using map and reduceByKey operation
+21.	val wordCount = words.map(word => (word, 1)).reduceByKey(_ + _)
+22.	//Save the result
+23.	wordCount.saveAsTextFile(args(1))
+24.	//stop the spark context
+25.	sc.stop
+26.	}
+27.	}
+
+6. Functions of SparkContext in Apache Spark
+ 
+10 Important Functions of SparkContext in Apache Spark
+i. To get the current status of Spark Application
+•	SpkEnv – It is a runtime environment with Spark’s public services. It interacts with each other to establish a distributed computing platform for Spark Application. A SparkEnv object that holds the required runtime services for running Spark application with the different environment for the driver and executor represents the Spark runtime environment.
+•	SparkConf – The Spark Properties handles maximum applications settings and are configured separately for each application. We can also easily set these properties on a SparkConf. Some common properties like master URL and application name, as well as an arbitrary key-value pair, configured through theset() method.
+•	Deployment environment (as master URL) – Spark deployment environment are of two types namely local and clustered. Local mode is non-distributed single-JVM deployment mode. All the execution components – driver, executor, LocalSchedulerBackend, and master are present in same single JVM. Hence, the only mode where drivers are useful for execution is the local mode. For testing, debugging or demonstration purpose, the local mode is suitable because it requires no earlier setup to launch spark application. While in clustered mode, the Spark runs in distributive mode. Learn Spark Cluster Manager in detail.
+ii. To set the configuration
+•	Master URL – The master method returns back the current value of spark.master which is deployment environment in use.
+•	Local properties-Creating Logical Job Groups – The reason of local properties concept is to form logical groups of jobs by means of properties that create the separate job launched from different threads belong to a single logic group. We can set a local property which will affect Spark jobs submitted from a thread, such as the Spark fair scheduler pool.
+•	Default Logging level – It lets you set the root login level in a Spark application, for example, Spark Shell.
+iii. To Access various services
+It also helps in accessing services like TaskScheduler, LiveListenBus, BlockManager, SchedulerBackend, ShuffelManager and the optional ContextCleaner.
+iv. To Cancel a job
+cancleJob simply requests DAGScheduler to drop a Spark job.
+Learn about Spark DAG(Directed Acyclic Graph) in detail.
+v. To Cancel a stage
+cancleStage simply requests DAGScheduler to drop a Spark stage.
+vi. For Closure cleaning in Spark
+Spark cleanups the closure every time an Action occurs, i.e. the body of Action before it is serialized and sent over the wire to execute. The clean method in SparkContext does this. This, in turn, calls ClosureClean.clean method. It not only cleans the closure but also referenced closure is clean transitively. It assumes serializable until it does not explicitly reference unserializable objects.
+vii. To Register Spark listener
+We can register a custom SparkListenerInterface with the help of addSparkListener method. We can also register custom listeners using the spark.extraListeners setting.
+viii. Programmable Dynamic allocation
+It also provides the following method as the developer API for dynamic allocation of executors: requestExecutors, killExecutors, requestTotalExecutors, getExecutorIds.
+ix. To access persistent RDD
+getPersistentRDDs gives the collection of RDDs that have marked themselves as persistent via cache.
+x. To unpersist RDDs
+From the master’s Block Manager and the internal persistentRdds mapping, the unpersist removes the RDD.
+So, this was all in Sparkcontext Tutorial. Hope you like our explanation.
+7. Conclusion
+Hence, SparkContext provides the various functions in Spark like get the current status of Spark Application, set the configuration, cancel a job, Cancel a stage and much more. It is an entry point to the Spark functionality. Thus, it acts a backbone.
+If you have any query about this tutorial, So feel free to Share with us. We will be glad to solve them
+
+
+SparkSession – New entry-point of Spark
+ 
+As we know, in previous versions, spark context is the entry point for spark, As RDD was the main API, it was created and manipulated using context API’s. For every other API, we needed to use a different context.
+For streaming we needed streamingContext. For SQL sqlContext and for hive hiveContext.But as dataSet and DataFrame API’s are becoming new standalone API’s we need an entry-point build for them. So in spark 2.0, we have a new entry point build for DataSet and DataFrame API’s called as Spark-Session.
+ 
+Its a combination of SQLContext, HiveContext and future streamingContext. All the API’s available on those contexts are available on SparkSession also SparkSession has a spark context for actual computation.
+ 
+Now we can forward how to create Spark Session and intersect with it.
+Creating a Spark Session
+Following codes are come in handy when you want to create SparkSession :
+  val spark = SparkSession.builder()
+  .master("local")
+  .appName("example of SparkSession")
+  .config("spark.some.config.option", "some-value")
+  .getOrCreate()
+SparkSession.builder()
+This method is created for constructing a SparkSession.
+master(“local”)
+Sets the spark master URL to connect to such as :
+•	“local” to run locally
+•	“local[4]” to run locally with 4 cores
+•	“spark://master:7077” to run on a spark standalone cluster
+appName( )
+Set a name for the application which will be shown in the spark Web UI.
+If no application name is set, a randomly generated name will be used.
+Config
+Sets a config option set using this method are automatically propagated to both ‘SparkConf’
+and ‘SparkSession’ own configuration, its arguments consist of key-value pair.
+GetOrElse
+Gets an existing SparkSession or, if there is a valid thread-local SparkSession and if yes, return that one. It then checks whether there is a valid global default SparkSession and if yes returns that one. If no valid global SparkSession exists, the method creates a new SparkSession and assign newly created SparkSession as the global default.
+In case an existing SparkSession is returned, the config option specified in this builder will be applied to existing SparkSession
+The above is similar to creating a SparkContext with local and creating an SQLContext wrapping it. If you can need to create hive context you can use below code to create spark session with hive support:
+val spark = SparkSession.builder()
+.master("local")
+.master("local")
+.appName("example of SparkSession")
+.config("spark.some.config.option", "some-value")
+.enableHiveSupport()
+.getOrCreate()
+enableHiveSupport on factory enable Hive support which is similar to HiveContext
+one created sparkSession, we can use it to read the data.
+Read data Using SparkSession
+SparkSession is the entry point for reading data, similar to the old SQLContext.read.
+The below code is reading data from CSV using SparkSession :
+  val df = spark.read.format("com.databricks.spark.csv")
+		.schema(customSchema)
+  		.load("data.csv")
+Spark 2.0.0 onwards, it is better to use SparkSession as it provides access to all the spark functionalities that sparkContext does. Also, it provides API to work on DataFrames and DataSets
+Running SQL queries
+SparkSession can be used to execute SQL queries over data, getting the result back as Data-Frame (i.e. Dataset[ROW]).
+display(spark.sql("Select * from TimeStamp"))
+
+
++--------------------+-----------+----------+-----+
+|           TimeStamp|Temperature|      date| Time|
++--------------------+-----------+----------+-----+
+|2010-02-25T05:42:...|      79.48|2010-02-25|05:42|
+|2010-02-25T05:42:...|      59.27|2010-02-25|05:42|
+|2010-02-25T05:42:...|      97.98|2010-02-25|05:42|
+|2010-02-25T05:42:...|      91.41|2010-02-25|05:42|
+|2010-02-25T05:42:...|      60.67|2010-02-25|05:42|
+|2010-02-25T05:42:...|      61.41|2010-02-25|05:42|
+|2010-02-25T05:42:...|       93.6|2010-02-25|05:42|
+|2010-02-25T05:42:...|      50.32|2010-02-25|05:42|
+|2010-02-25T05:42:...|      64.69|2010-02-25|05:42|
+|2010-02-25T05:42:...|      78.57|2010-02-25|05:42|
+|2010-02-25T05:42:...|      66.89|2010-02-25|05:42|
+|2010-02-25T05:42:...|      62.87|2010-02-25|05:42|
+|2010-02-25T05:42:...|      74.32|2010-02-25|05:42|
+|2010-02-25T05:42:...|      96.55|2010-02-25|05:42|
+|2010-02-25T05:42:...|      71.93|2010-02-25|05:42|
+|2010-02-25T05:42:...|      79.17|2010-02-25|05:42|
+|2010-02-25T05:42:...|      73.89|2010-02-25|05:42|
+|2010-02-25T05:42:...|      80.97|2010-02-25|05:42|
+|2010-02-25T05:42:...|      81.04|2010-02-25|05:42|
+|2010-02-25T05:42:...|      53.05|2010-02-25|05:42|
++--------------------+-----------+----------+-----+
+only showing top 20 rows
+
+Working with config Options
+SparkSession can also be used to set runtime configuration options which can toggle optimizer behavior or I/O (i.e. Hadoop) behavior.
+Spark.conf.get(“Spark.Some.config”,”abcd”)
+Spark.conf.get(“Spark.Some.config”)
+and config options set can also be used in SQL using variable substitution
+%Sql select “${spark.some.config}”
+Working with metadata directly
+SparkSession also includes a catalog method that contains methods to work with the metastore (i.e. data catalog). Method return Datasets so you can use the same dataset API to play with them.
+To get a list of tables in the current database
+val tables =spark.catalog.listTables()
+display(tables)
++----+--------+-----------+---------+-----------+
+|name|database|description|tableType|isTemporary|
++----+--------+-----------+---------+-----------+
+|Stu |default |null       |Managed  |false      |
++----+--------+-----------+---------+-----------+
+use the dataset API to filter on names
+display(tables.filter(_.name contains “son”)))
++----+--------+-----------+---------+-----------+
+|name|database|description|tableType|isTemporary|
++----+--------+-----------+---------+-----------+
+|Stu |default |null       |Managed  |false      |
++----+--------+-----------+---------+-----------+
+Get the list of the column for a table
+display(spark.catalog.listColumns(“smart”))
++-----+----------+----------+-----------+-------------+--------+
+|name |description|dataType |nullable   |isPartitioned|isbucket|
++-----+-----------+---------+-----------+-------------+--------+
+|email|null       |string   |true       |false        |false   |
++-----+-----------+---------+-----------+-------------+--------+
+|iq   |null       |bigInt   |true       |false        |false   |
++-----+-----------+---------+-----------+-------------+--------+
+
+Access the underlying SparkContext
+SparkSession.sparkContext returns the underlying sparkContext, used for creating RDDs as well as managing cluster resources.
+Spark.sparkContext
+res17: org.apache.spark.SparkContext = org.apache.spark.SparkContext@2debe9ac
+
+
+SPARK DEFINITIONS:
+It may be useful to provide some simple definitions for the Spark nomenclature:
+Node: A server
+Worker Node: A server that is part of the cluster and are available to run Spark jobs
+Master Node: The server that coordinates the Worker nodes.
+Executor: A sort of virtual machine inside a node. One Node can have multiple Executors.
+Driver Node: The Node that initiates the Spark session. Typically, this will be the server where sparklyr is located.
+Driver (Executor): The Driver Node will also show up in the Executor list.
+
+https://spark.rstudio.com/guides/connections/
+
+Understanding Resource Allocation configurations for a Spark application
+Posted on December 11th, 2016 by Ramprasad Pedapatnam
+|
+Resource Allocation is an important aspect during the execution of any spark job. If not configured correctly, a spark job can consume entire cluster resources and make other applications starve for resources.
+This blog helps to understand the basic flow in a Spark Application and then how to configure the number of executors, memory settings of each executors and the number of cores for a Spark Job. There are a few factors that we need to consider to decide the optimum numbers for the above three, like:
+•	The amount of data
+•	The time in which a job has to complete
+•	Static or dynamic allocation of resources
+•	Upstream or downstream application
+ 
+Introduction
+ 
+Let’s start with some basic definitions of the terms used in handling Spark applications.
+Partitions : A partition is a small chunk of a large distributed data set. Spark manages data using partitions that helps parallelize data processing with minimal data shuffle across the executors.
+Task : A task is a unit of work that can be run on a partition of a distributed dataset and gets executed on a single executor. The unit of parallel execution is at the task level.All the tasks with-in a single stage can be executed in parallel
+Executor : An executor is a single JVM process which is launched for an application on a worker node. Executor runs tasks and keeps data in memory or disk storage across them. Each application has its own executors. A single node can run multiple executors and executors for an application can span multiple worker nodes. An executor stays up for the
+duration of the Spark Application and runs the tasks in multiple threads. The number of executors for a spark application can be specified inside the SparkConf or via the flag –num-executors from command-line.
+Cluster Manager : An external service for acquiring resources on the cluster (e.g. standalone manager, Mesos, YARN). Spark is agnostic to a cluster manager as long as it can acquire executor processes and those can communicate with each other.We are primarily interested in Yarn as the cluster manager. A spark cluster can run in either yarn cluster or yarn-client mode:
+yarn-client mode – A driver runs on client process, Application Master is only used for requesting resources from YARN.
+yarn-cluster mode – A driver runs inside application master process, client goes away once the application is initialized
+Cores : A core is a basic computation unit of CPU and a CPU may have one or more cores to perform tasks at a given time. The more cores we have, the more work we can do. In spark, this controls the number of parallel tasks an executor can run.
+ 
+ 
+ 
+Steps involved in cluster mode for a Spark Job
+1.	From the driver code, SparkContext connects to cluster manager (standalone/Mesos/YARN).
+2.	Cluster Manager allocates resources across the other applications. Any cluster manager can be used as long as the executor processes are running and they communicate with each other.
+3.	Spark acquires executors on nodes in cluster. Here each application will get its own executor processes.
+4.	Application code (jar/python files/python egg files) is sent to executors
+5.	Tasks are sent by SparkContext to the executors.
+ 
+From the above steps, it is clear that the number of executors and their memory setting play a major role in a spark job. Running executors with too much memory often results in excessive garbage collection delays
+Now we try to understand, how to configure the best set of values to optimize a spark job.
+There are two ways in which we configure the executor and core details to the Spark job. They are:
+1.	Static Allocation – The values are given as part of spark-submit
+2.	Dynamic Allocation – The values are picked up based on the requirement (size of data, amount of computations needed) and released after use. This helps the resources to be re-used for other applications.
+ 
+Static Allocation
+ 
+Different cases are discussed varying different parameters and arriving at different combinations as per user/data requirements.
+ 
+Case 1 Hardware – 6 Nodes and each node have 16 cores, 64 GB RAM
+First on each node, 1 core and 1 GB is needed for Operating System and Hadoop Daemons, so we have 15 cores, 63 GB RAM for each node
+We start with how to choose number of cores:
+Number of cores = Concurrent tasks an executor can run
+So we might think, more concurrent tasks for each executor will give better performance. But research shows that any application with more than 5 concurrent tasks, would lead to a bad show. So the optimal value is 5.
+This number comes from the ability of an executor to run parallel tasks and not from how many cores a system has. So the number 5 stays same even if we have double (32) cores in the CPU
+Number of executors:
+Coming to the next step, with 5 as cores per executor, and 15 as total available cores in one node (CPU) – we come to 3 executors per node which is 15/5. We need to calculate the number of executors on each node and then get the total number for the job.
+So with 6 nodes, and 3 executors per node – we get a total of 18 executors. Out of 18 we need 1 executor (java process) for Application Master in YARN. So final number is 17 executors
+This 17 is the number we give to spark using –num-executors while running from spark-submit shell command
+Memory for each executor:
+From above step, we have 3 executors per node. And available RAM on each node is 63 GB
+So memory for each executor in each node is 63/3 = 21GB.
+However small overhead memory is also needed to determine the full memory request to YARN for each executor.
+The formula for that overhead is max(384, .07 * spark.executor.memory)
+Calculating that overhead:  .07 * 21 (Here 21 is calculated as above 63/3) = 1.47
+Since 1.47 GB > 384 MB, the overhead is 1.47
+Take the above from each 21 above => 21 – 1.47 ~ 19 GB
+So executor memory – 19 GB
+Final numbers – Executors – 17, Cores 5, Executor Memory – 19 GB
+ 
+Case 2 Hardware – 6 Nodes and Each node have 32 Cores, 64 GB
+ 
+Number of cores of 5 is same for good concurrency as explained above.
+Number of executors for each node = 32/5 ~ 6
+So total executors = 6 * 6 Nodes = 36. Then final number is 36 – 1(for AM) = 35
+Executor memory:
+6 executors for each node. 63/6 ~ 10. Overhead is .07 * 10 = 700 MB. So rounding to 1GB as overhead, we get 10-1 = 9 GB
+Final numbers – Executors – 35, Cores 5, Executor Memory – 9 GB
+ 
+Case 3 – When more memory is not required for the executors
+ 
+The above scenarios start with accepting number of cores as fixed and moving to the number of executors and memory.
+Now for the first case, if we think we do not need 19 GB, and just 10 GB is sufficient based on the data size and computations involved, then following are the numbers:
+Cores: 5
+Number of executors for each node = 3. Still 15/5 as calculated above.
+At this stage, this would lead to 21 GB, and then 19 as per our first calculation. But since we thought 10 is ok (assume little overhead), then we cannot switch the number of executors per node to 6 (like 63/10). Because with 6 executors per node and 5 cores it comes down to 30 cores per node, when we only have 16 cores. So we also need to change number of cores for each executor.
+So calculating again,
+The magic number 5 comes to 3 (any number less than or equal to 5). So with 3 cores, and 15 available cores – we get 5 executors per node, 29 executors ( which is  (5*6 -1)) and memory is 63/5 ~ 12.
+Overhead is 12*.07=.84. So executor memory is 12 – 1 GB = 11 GB
+Final Numbers are 29 executors, 3 cores, executor memory is 11 GB
+ 
+Summary Table
+ 
+ 
+ 
+Dynamic Allocation
+ 
+Note: Upper bound for the number of executors if dynamic allocation is enabled is infinity. So this says that spark application can eat away all the resources if needed. In a cluster where we have other applications running and they also need cores to run the tasks, we need to make sure that we assign the cores at cluster level.
+ 
+This means that we can allocate specific number of cores for YARN based applications based on user access. So we can create a spark_user and then give cores (min/max) for that user. These limits are for sharing between spark and other applications which run on YARN.
+To understand dynamic allocation, we need to have knowledge of the following properties:
+spark.dynamicAllocation.enabled – when this is set to true we need not mention executors. The reason is below:
+The static parameter numbers we give at spark-submit is for the entire job duration. However if dynamic allocation comes into picture, there would be different stages like the following:
+What is the number for executors to start with:
+Initial number of executors (spark.dynamicAllocation.initialExecutors) to start with
+ Controlling the number of executors dynamically:
+Then based on load (tasks pending) how many executors to request. This would eventually be the number what we give at spark-submit in static way. So once the initial executor numbers are set, we go to min (spark.dynamicAllocation.minExecutors) and max (spark.dynamicAllocation.maxExecutors) numbers.
+ When to ask new executors or give away current executors:
+When do we request new executors (spark.dynamicAllocation.schedulerBacklogTimeout) – This means that there have been pending tasks for this much duration. So the request for the number of executors requested in each round increases exponentially from the previous round. For instance, an application will add 1 executor in the first round, and then 2, 4, 8 and so on executors in the subsequent rounds. At a specific point, the above property max comes into picture.
+When do we give away an executor is set using spark.dynamicAllocation.executorIdleTimeout.
+To conclude, if we need more control over the job execution time, monitor the job for unexpected data volume the static numbers would help. By moving to dynamic, the resources would be used at the background and the jobs involving unexpected volumes might affect other applications.
+
+When should apache spark be run in yarn-cluster mode vs yarn-client mode?
+Major difference between yarn-cluster mode and yarn-client mode is the location where driver program is run.
+In yarn-cluster mode, the driver program will run on the node where application master is running where as in yarn-client mode the driver program will run on the node on which job is submitted on centralized gateway node.
+Here you need to understand that driver program take good amount of resources and if many spark jobs are submitted on the centralized gateway node, it can become bottleneck. As application master might run on any of the worker node in the cluster in yarn-cluster mode, driver programs are distributed on the cluster. Hence it is better scalable.
+If there are too many simultaneous jobs running, better to use yarn-cluster mode otherwise use yarn-client mode.
+
+What is a partition in Spark?
+Resilient Distributed Datasets are collection of various data items that are so huge in size, that they cannot fit into a single node and have to be partitioned across various nodes. Spark automatically partitions RDDs and distributes the partitions across different nodes. A partition in spark is an atomic chunk of data (logical division of data) stored on a node in the cluster. Partitions are basic units of parallelism in Apache Spark. RDDs in Apache Spark are collection of partitions.
+Creating a Partition in Spark
+Here’s a simple example that creates a list of 10 integers with 3 partitions –
+integer_RDD = sc.parallelize (range (10), 3)
+Characteristics of Partitions in Apache Spark
+•	Every machine in a spark cluster contains one or more partitions.
+•	The number of partitions in spark are configurable and having too few or too many partitions is not good.
+•	Partitions in Spark do not span multiple machines.
+Partitioning in Apache Spark
+One important way to increase parallelism of spark processing is to increase the number of executors on the cluster. However, knowing how the data should be distributed, so that the cluster can process data efficiently is extremely important. The secret to achieve this is partitioning in Spark. Apache Spark manages data through RDDs using partitions which help parallelize distributed data processing with negligible network traffic for sending data between executors. By default, Apache Spark reads data into an RDD from the nodes that are close to it.
+Communication is very expensive in distributed programming, thus laying out data to minimize network traffic greatly helps improve performance. Just like how a single node program should choose the right data structure for a collection of records, a spark program can control RDD partitioning to reduce communications. Partitioning in Spark might not be helpful for all applications, for instance, if a RDD is scanned only once, then portioning data within the RDD might not be helpful but if a dataset is reused multiple times in various key oriented operations like joins, then partitioning data will be helpful.
+Partitioning is an important concept in apache spark as it determines how the entire hardware resources are accessed when executing any job. In apache spark, by default a partition is created for every HDFS partition of size 64MB. RDDs are automatically partitioned in spark without human intervention, however, at times the programmers would like to change the partitioning scheme by changing the size of the partitions and number of partitions based on the requirements of the application. For custom partitioning developers have to check the number of slots in the hardware and how many tasks an executor can handle to optimize performance and achieve parallelism.
+
+How many partitions should a Spark RDD have?
+ Having too large a number of partitions or too few - is not an ideal solution. The number of partitions in spark should be decided thoughtfully based on the cluster configuration and requirements of the application. Increasing the number of partitions will make each partition have less data or no data at all. Apache Spark can run a single concurrent task for every partition of an RDD, up to the total number of cores in the cluster. If a cluster has 30 cores then programmers want their RDDs to have 30 cores at the very least or maybe 2 or 3 times of that.
+As already mentioned above, one partition is created for each block of the file in HDFS which is of size 64MB.However, when creating a RDD a second argument can be passed that defines the number of partitions to be created for an RDD.
+val rdd= sc.textFile (“file.txt”, 5)
+The above line of code will create an RDD named textFile with 5 partitions. Suppose that you have a cluster with four cores and assume that each partition needs to process for 5 minutes. In case of the above RDD with 5 partitions, 4 partition processes will run in parallel as there are four cores and the 5th partition process will process after 5 minutes when one of the 4 cores, is free. The entire processing will be completed in 10 minutes and during the 5th partition process, the resources (remaining 3 cores) will remain idle. The best way to decide on the number of partitions in an RDD is to make the number of partitions equal to the number of cores in the cluster so that all the partitions will process in parallel and the resources will be utilized in an optimal way.
+The number of partitions in a Spark RDD can always be found by using the partitions method of RDD. For the RDD that we created the partitions method will show an output of 5 partitions
+Scala> rdd.partitions.size
+Output = 5
+If an RDD has too many partitions, then task scheduling may take more time than the actual execution time. To the contrary, having too less partitions is also not beneficial as some of the worker nodes could just be sitting idle resulting in less concurrency. This could lead to improper resource utilization and data skewing i.e. data might be skewed on a single partition and a worker node might be doing more than other worker nodes. Thus, there is always a trade off when it comes to deciding on the number of partitions.
+Some acclaimed guidelines for the number of partitions in Spark are as follows-
+When the number of partitions is between 100 and 10K partitions based on the size of the cluster and data, the lower and upper bound should be determined.
+•	The lower bound for spark partitions is determined by 2 X number of cores in the cluster available to application.
+•	Determining the upper bound for partitions in Spark, the task should take 100+ ms time to execute. If it takes less time, then the partitioned data might be too small or the application might be spending extra time in scheduling tasks.
+Types of Partitioning in Apache Spark
+1.	Hash Partitioning in Spark
+2.	Range Partitioning in Spark
+Hash Partitioning in Spark
+Hash Partitioning attempts to spread the data evenly across various partitions based on the key. Object.hashCode method is used to determine the partition in Spark as partition = key.hashCode () % numPartitions.
+Range Partitioning in Spark
+Some Spark RDDs have keys that follow a particular ordering, for such RDDs, range partitioning is an efficient partitioning technique. In range partitioning method, tuples having keys within the same range will appear on the same machine. Keys in a range partitioner are partitioned based on the set of sorted range of keys and ordering of keys.
+Spark’s range partitioning and hash partitioning techniques are ideal for various spark use cases but spark does allow users to fine tune how their RDD is partitioned, by using custom partitioner objects. Custom Spark partitioning is available only for pair RDDs i.e. RDDs with key value pairs as the elements can be grouped based on a function of each key. Spark does not provide explicit control of which key will go to which worker node but it ensures that a set of keys will appear together on some node. For instance, you might range partition the RDD based on the sorted range of keys so that elements having keys within the same range will appear on the same node or you might want to hash partition the RDD into 100 partitions so that keys that have same hash value for modulo 100 will appear on the same node.
+How to set partitioning for data in Apache Spark?
+RDDs can be created with specific partitioning in two ways –
+i.	Providing explicit partitioner by calling partitionBy method on an RDD,
+ii.	Applying transformations that return RDDs with specific partitioners. Some operation on RDDs that hold to and propagate a partitioner are-
+•	Join
+•	LeftOuterJoin
+•	RightOuterJoin
+•	groupByKey
+•	reduceByKey
+•	foldByKey
+•	sort
+•	partitionBy
+•	foldByKey
+
+Fault tolerate Apache Spark
+Most important concept in ‘Fault tolerate Apache Spark’ is RDD.
+Resilient Distributed Datasets.
+Spark maintains a DAG (Directed Acyclic Graph), which is a 1 way graph connecting nodes. Where nodes depict the intermediate results you get from your transformations.
+ 
+Any time your job fails the DAG is re-run from the nearest node of failure to re compute the RDD.
+But as your DAG grows, you might want to checkpoint your RDD so that in case it fails in initial part, almost whole DAG isn’t re-run (spark bleeds for memory efficiency).
+You might ask whats checkpoint. Its a technique where you store your RDD instantly and it works at file level instead of cache level unlike persist/cache operations.
+Also, you should cache your RDD before checkpoint, because Spark re computes your RDD before checkpointing it and thus its run 2 times , and when you cache it Spark will simply store the cached RDD in memory. And thus in case of failure spark will simply load the latest checkpoint and you will have a fault tolerant system.
+Now spark has fault tolerant feature at Resource manager and Master falure level too. that is achieved through ZOOKEEPER. You might wanna get into that as well.
+ 
+
+Spark vs yarn fault tolrence
+You cannot compare Yarn and Spark directly per say. Yarn is a distributed container manager, like Mesos for example, whereas Spark is a data processing tool. Spark can run on Yarn, the same way Hadoop Map Reduce can run on Yarn. It just happens that Hadoop Map Reduce is a feature that ships with Yarn, when Spark is not.
+
+ Why Lazy Evaluation is Important in spark 
+
+Before starting with lazy evaluation in Spark, let us revise Apache Spark concepts.
+As the name itself indicates its definition, lazy evaluation in Spark means that the execution will not start until an action is triggered. In Spark, the picture of lazy evaluation comes when Spark transformations occur.
+Transformations are lazy in nature meaning when we call some operation in RDD, it does not execute immediately. Spark maintains the record of which operation is being called(Through DAG). We can think Spark RDD as the data, that we built up through transformation. Since transformations are lazy in nature, so we can execute operation any time by calling an action on data. Hence, in lazy evaluation data is not loaded until it is necessary.
+
+In MapReduce, much time of developer wastes in minimizing the number of MapReduce passes. It happens by clubbing the operations together. While in Spark we do not create the single execution graph, rather we club many simple operations. Thus it creates the difference between Hadoop MapReduce vs Apache Spark.
+In Spark, driver program loads the code to the cluster. When the code executes after every operation, the task will be time and memory consuming. Since each time data goes to the cluster for evaluation.
+
+3. Advantages of Lazy Evaluation in Spark Transformation
+There are some benefits of Lazy evaluation in Apache Spark-
+a. Increases Manageability
+By lazy evaluation, users can organize their Apache Spark program into smaller operations. It reduces the number of passes on data by grouping operations.
+b. Saves Computation and increases Speed
+Spark Lazy Evaluation plays a key role in saving calculation overhead. Since only necessary values get compute. It saves the trip between driver and cluster, thus speeds up the process.
+c. Reduces Complexities
+The two main complexities of any operation are time and space complexity. Using Apache Spark lazy evaluation we can overcome both. Since we do not execute every operation, Hence, the time gets saved. It let us work with an infinite data structure. The action is triggered only when the data is required, it reduces overhead.
+d. Optimization
+It provides optimization by reducing the number of queries. Learn more about Apache Spark Optimization.
+
+Transformations Vs Actions
+
+https://data-flair.training/blogs/spark-rdd-operations-transformations-actions/
+https://www.edupristine.com/blog/apache-spark-rdd-transformations-actions
+
+ Reduce By Key vs Group By key 
+
+https://learndbigdata.com/2018/07/17/spark-groupbykey-reducebykey-aggregatebykey/
+
+Avoid GroupByKey
+https://databricks.gitbooks.io/databricks-spark-knowledge-base/content/best_practices/prefer_reducebykey_over_groupbykey.html
+
+What is Spark Lineage 
+
+Whenever a series of transformations are performed on an RDD, they are not evaluated immediately, but lazily.
+When a new RDD has been created from an existing RDD, that new RDD contains a pointer to the parent RDD. Similarly, all the dependencies between the RDDs will be logged in a graph, rather than the actual data. This graph is called the lineage graph.
+For eg., consider the below operations:
+1. Create a new RDD from a text file – first RDD
+2. Apply map operation on first RDD to get second RDD
+3. Apply filter operation on second RDD to get third RDD
+4. Apply count operation on third RDD to get fourth RDD
+Lineage graph of all these operations looks like:
+First RDD —> Second RDD (applying map) —> Third RDD (applying filter) —> Fourth RDD (applying count)
+This lineage graph will be useful in case if any of the partitions are lost. Spark can replay the transformation on that partition using the lineage graph existing in DAG (Directed Acyclic Graph) to achieve the same computation, rather than replicating the data cross different nodes as in HDFS.
+
+Spark Lineage Vs DAG 
+Lineage graph
+As we know, that whenever a series of transformations are performed on an RDD, they are not evaluated immediately, but lazily(Lazy Evaluation). When a new RDD has been created from an existing RDD, that new RDD contains a pointer to the parent RDD. Similarly, all the dependencies between the RDDs will be logged in a graph, rather than the actual data. This graph is called the lineage graph.
+Now coming to DAG,
+Directed Acyclic Graph(DAG)
+DAG in Apache Spark is a combination of Vertices as well as Edges. In DAG vertices represent the RDDs and the edges represent the Operation to be applied on RDD. Every edge in DAG is directed from earlier to later in a sequence.When we call anAction, the created DAG is submitted to DAG Scheduler which further splits the graph into the stages of the task.
+
+Accumulator
+Spark Broadcast and Accumulator Overview
+So far, we’ve learned about distributing processing tasks across a Spark cluster.  But, let’s go a bit deeper in a couple of approaches you may need when designing distributed tasks.  I’d like to start with a question.  What do we do when we need each Spark worker task to coordinate certain variables and values with each other?  I mean, let’s imagine we want each task to know the state of variables or values instead of simply independently returning action results back to the driver program.   If you are thinking of terms such as shared state or “stateful” vs. “stateless”, then you are on the right track.  Or, that’s how I think of the Spark Broadcast and Accumulators.  In this post, we’ll discuss two constructs of sharing variables across a Spark cluster and then review example Scala code.
+
+Spark Shared Variables
+When functions are passed to a specific Spark operation, it is executed on a particular remote cluster node.  Usually, the operation is done in a way that different copy of variable(s) are used within the function. These particular variables are carefully copied into the different machines, and the updates to the variables in the said remote machines are not propagated back to the driver program. For this reason, one cannot support the general; read-write shared variables across the tasks and expects them to be efficient. Nevertheless, Spark does provide two different types (limited) of shared variables to two known usage patterns.
+•	Broadcast variables
+•	Accumulators
+Broadcast Variables
+Broadcast variables allow Spark developers to keep a secured read-only variable cached on different nodes, other than merely shipping a copy of it with the needed tasks. For an instance, they can be used to give a node a copy of a large input dataset without having to waste time with network transfer I/O. Spark has the ability to distribute broadcast variables using various broadcast algorithms which will in turn largely reduce the cost of communication.
+Actions in Spark can be executed through different stages. These stages are separated by distributed “shuffle” operations. Within each stage, Spark automatically broadcasts common data needed in a cached, serialized form which will be de-serialized by each node before the running of each task.  For this reason, if you create broadcast variables explicitly, it should only be done when tasks across multiple stages are in need of same data.
+Broadcast variables are created by wrapping with SparkContext.broadcast function as shown in the following Scala code
+scala> val broadcastVar = sc.broadcast(Array(1, 2, 3))
+broadcastVar: org.apache.spark.broadcast.Broadcast[Array[Int]] = Broadcast(0)
+
+scala> broadcastVar.value
+res2: Array[Int] = Array(1, 2, 3)
+ 
+Accumulators
+As you might assume from the name, Accumulators are variables which may be added to through associated operations.  There are many uses for accumulators including implementing counters or sums.  Spark supports the accumulation of numeric types easily, but programmers can add support for other types.  If there is a particular name for an accumulator in code, it is usually displayed in the Spark UI, which will be useful in understanding the running stage progress.
+Accumulators are created from an initial value v; i.e. `SparkContext.accumulator(v)`.  Then the tasks running in the cluster can be added to it using the known “add method” or += operator in Scala. They cannot, however, read the value of it. The driver program has the ability to read the value of the accumulator, using the `value` method as shown below
+scala> val accum = sc.accumulator(0, "Accumulator Example")
+accum: spark.Accumulator[Int] = 0
+
+scala> sc.parallelize(Array(1, 2, 3)).foreach(x => accum += x)
+
+scala> accum.value
+res4: Int = 6
+ 
+Spark Broadcast and Spark Accumulators Example Driver Program in Scala
+With this background on broadcast and accumulators, let’s take a look at more extensive examples in Scala.  The context of the following example code is developing a web server log file analyzer for certain types of http status codes. We can easily imagine the advantages of using Spark when processing a large volume of log file data.  See the Resources section below for source code download links.
+Let’s start with an object containing the `main` method and definition of one broadcast variable and numerous accumulators:
+object Boot {
+
+ import utils.Utils._
+
+ def main(args: Array[String]): Unit = {
+
+   val sparkConf = new SparkConf(true)
+     .setMaster("local[2]")
+     .setAppName("SparkAnalyzer")
+
+   val sparkContext = new SparkContext(sparkConf)
+
+   /**
+     * Defining list of all HTTP status codes divided into status groups
+     * This list is read only, and it is used for parsing access log file in order to count status code groups
+     *
+     * This example of broadcast variable shows how broadcast value
+     */
+   val httpStatusList = sparkContext broadcast populateHttpStatusList
+
+   /**
+     * Definition of accumulators for counting specific HTTP status codes
+     * Accumulator variable is used because of all the updates to this variable in every executor is relayed back to the driver.
+     * Otherwise they are local variable on executor and it is not relayed back to driver
+     * so driver value is not changed
+     */
+   val httpInfo = sparkContext accumulator(0, "HTTP 1xx")
+   val httpSuccess = sparkContext accumulator(0, "HTTP 2xx")
+   val httpRedirect = sparkContext accumulator(0, "HTTP 3xx")
+   val httpClientError = sparkContext accumulator(0, "HTTP 4xx")
+   val httpServerError = sparkContext accumulator(0, "HTTP 5xx")
+
+   /**
+     * Iterate over access.log file and parse every line
+     * for every line extract HTTP status code from it and update appropriate accumulator variable
+     */
+   sparkContext.textFile(getClass.getResource("/access.log").getPath, 2).foreach { line =>
+     httpStatusList.value foreach {
+       case httpInfoStatus: HttpInfoStatus if (AccessLogParser.parseHttpStatusCode(line).equals(Some(httpInfoStatus))) => httpInfo += 1
+       case httpSuccessStatus: HttpSuccessStatus if (AccessLogParser.parseHttpStatusCode(line).equals(Some(httpSuccessStatus))) => httpSuccess += 1
+       case httpRedirectStatus: HttpRedirectStatus if (AccessLogParser.parseHttpStatusCode(line).equals(Some(httpRedirectStatus))) => httpRedirect += 1
+       case httpClientErrorStatus: HttpClientErrorStatus if (AccessLogParser.parseHttpStatusCode(line).equals(Some(httpClientErrorStatus))) => httpClientError += 1
+       case httpServerErrorStatus: HttpServerErrorStatus if (AccessLogParser.parseHttpStatusCode(line).equals(Some(httpServerErrorStatus))) => httpServerError += 1
+       case _ =>
+     }
+   }
+
+   println("########## START ##########")
+   println("Printing HttpStatusCodes result from parsing access log")
+   println(s"HttpStatusInfo : ${httpInfo.value}")
+   println(s"HttpStatusSuccess : ${httpSuccess.value}")
+   println(s"HttpStatusRedirect : ${httpRedirect.value}")
+   println(s"HttpStatusClientError : ${httpClientError.value}")
+   println(s"HttpStatusServerError : ${httpServerError.value}")
+   println("########## END ##########")
+
+   sparkContext.stop()
+ }
+
+}
+ 
+As you can hopefully see above, we plan to use the `httpStatusList` when determining which accumulator to update.
+`populateHttpStatusList` is available from the import to Utils and looks like
+ 
+object Utils {
+
+  private val httpStatuses = List(
+    "100", "101", "103",
+    "200", "201", "202", "203", "204", "205", "206",
+    "300", "301", "302", "303", "304", "305", "306", "307", "308",
+    "400", "401", "402", "403", "404", "405", "406", "407", "408", "409", "410", "411", "412", "413", "414", "415", "416", "417",
+    "500", "501", "502", "503", "504", "505", "511"
+  )
+
+  def populateHttpStatusList(): List[HttpStatus] = {
+      httpStatuses map createHttpStatus
+  }
+
+  def createHttpStatus(status: String): HttpStatus = status match {
+    case status if (status.startsWith("1")) => HttpInfoStatus(status)
+    case status if (status.startsWith("2")) => HttpSuccessStatus(status)
+    case status if (status.startsWith("3")) => HttpRedirectStatus(status)
+    case status if (status.startsWith("4")) => HttpClientErrorStatus(status)
+    case status if (status.startsWith("5")) => HttpServerErrorStatus(status)
+  }
+
+}
+AccessLogParser could be considered a wrapper for regular expression boogie woogie as seen next
+object AccessLogParser extends Serializable {
+  import Utils._
+
+  private val ddd = "\\d{1,3}"
+  private val ip = s"($ddd\\.$ddd\\.$ddd\\.$ddd)?"
+  private val client = "(\\S+)"
+  private val user = "(\\S+)"
+  private val dateTime = "(\\[.+?\\])"
+  private val request = "\"(.*?)\""
+  private val status = "(\\d{3})"
+  private val bytes = "(\\S+)"
+  private val referer = "\"(.*?)\""
+  private val agent = "\"(.*?)\""
+  private val accessLogRegex = s"$ip $client $user $dateTime $request $status $bytes $referer $agent"
+  private val p = Pattern.compile(accessLogRegex)
+
+  /**
+    * Extract HTTP status code and create HttpStatus instance for given status code
+    */
+  def parseHttpStatusCode(logLine: String): Option[HttpStatus] = {
+    val matcher = p.matcher(logLine)
+    if(matcher.find) {
+      Some(createHttpStatus(matcher.group(6)))
+    }
+    else {
+      None
+    }
+  }
+
+}
+
+
+Introducing DataFrames in Apache Spark for Large Scale Data Science
+   by Reynold Xin, Michael Armbrust and Davies Liu Posted in ENGINEERING BLOGFebruary 17, 2015
+Today, we are excited to announce a new DataFrame API designed to make big data processing even easier for a wider audience.
+When we first open sourced Apache Spark, we aimed to provide a simple API for distributed data processing in general-purpose programming languages (Java, Python, Scala). Spark enabled distributed data processing through functional transformations on distributed collections of data (RDDs). This was an incredibly powerful API: tasks that used to take thousands of lines of code to express could be reduced to dozens.
+As Spark continues to grow, we want to enable wider audiences beyond “Big Data” engineers to leverage the power of distributed processing. The new DataFrames API was created with this goal in mind.  This API is inspired by data frames in R and Python (Pandas), but designed from the ground-up to support modern big data and data science applications. As an extension to the existing RDD API, DataFrames feature:
+•	Ability to scale from kilobytes of data on a single laptop to petabytes on a large cluster
+•	Support for a wide array of data formats and storage systems
+•	State-of-the-art optimization and code generation through the Spark SQL Catalystoptimizer
+•	Seamless integration with all big data tooling and infrastructure via Spark
+•	APIs for Python, Java, Scala, and R (in development via SparkR)
+For new users familiar with data frames in other programming languages, this API should make them feel at home. For existing Spark users, this extended API will make Spark easier to program, and at the same time improve performance through intelligent optimizations and code-generation.
+What Are DataFrames?
+In Spark, a DataFrame is a distributed collection of data organized into named columns. It is conceptually equivalent to a table in a relational database or a data frame in R/Python, but with richer optimizations under the hood. DataFrames can be constructed from a wide array of sources such as: structured data files, tables in Hive, external databases, or existing RDDs.
+The following example shows how to construct DataFrames in Python. A similar API is available in Scala and Java.
+Constructs a DataFrame from the users table in Hive.
+
+users = context.table(“users”)
+
+from JSON files in S3
+
+logs = context.load(“s3n://path/to/data.json”, “json”)
+How Can One Use DataFrames?
+Once built, DataFrames provide a domain-specific language for distributed data manipulation.  Here is an example of using DataFrames to manipulate the demographic data of a large population of users:
+Create a new DataFrame that contains “young users” only
+
+young = users.filter(users.age < 21)
+
+Alternatively, using Pandas-like syntax
+
+young = users[users.age < 21]
+
+Increment everybody’s age by 1
+
+young.select(young.name, young.age + 1)
+
+Count the number of young users by gender
+
+young.groupBy(“gender”).count()
+
+Join young users with another DataFrame called logs
+
+young.join(logs, logs.userId == users.userId, “left_outer”)
+You can also incorporate SQL while working with DataFrames, using Spark SQL. This example counts the number of users in the young DataFrame.
+young.registerTempTable(“young”)
+
+context.sql(“SELECT count(*) FROM young”)
+In Python, you can also convert freely between Pandas DataFrame and Spark DataFrame:
+Convert Spark DataFrame to Pandas
+
+pandas_df = young.toPandas()
+
+Create a Spark DataFrame from Pandas
+
+spark_df = context.createDataFrame(pandas_df)
+Similar to RDDs, DataFrames are evaluated lazily. That is to say, computation only happens when an action (e.g. display result, save output) is required. This allows their executions to be optimized, by applying techniques such as predicate push-downs and bytecode generation, as explained later in the section “Under the Hood: Intelligent Optimization and Code Generation”. All DataFrame operations are also automatically parallelized and distributed on clusters.
+Supported Data Formats and Sources
+Modern applications often need to collect and analyze data from a variety of sources. Out of the box, DataFrame supports reading data from the most popular formats, including JSON files, Parquet files, Hive tables. It can read from local file systems, distributed file systems (HDFS), cloud storage (S3), and external relational database systems via JDBC. In addition, through Spark SQL’s external data sources API, DataFrames can be extended to support any third-party data formats or sources. Existing third-party extensions already include Avro, CSV, ElasticSearch, and Cassandra.
+ 
+DataFrames’ support for data sources enables applications to easily combine data from disparate sources (known as federated query processing in database systems). For example, the following code snippet joins a site’s textual traffic log stored in S3 with a PostgreSQL database to count the number of times each user has visited the site.
+users = context.jdbc(“jdbc:postgresql:production”, “users”)
+
+logs = context.load(“/path/to/traffic.log”)
+
+logs.join(users, logs.userId == users.userId, “left_outer”) \
+
+.groupBy(“userId”).agg({“*”: “count”})
+Application: Advanced Analytics and Machine Learning
+Data scientists are employing increasingly sophisticated techniques that go beyond joins and aggregations. To support this, DataFrames can be used directly in MLlib’s machine learning pipeline API. In addition, programs can run arbitrarily complex user functions on DataFrames.
+Most common advanced analytics tasks can be specified using the new pipeline API in MLlib. For example, the following code creates a simple text classification pipeline consisting of a tokenizer, a hashing term frequency feature extractor, and logistic regression.
+tokenizer = Tokenizer(inputCol=”text”, outputCol=”words”)
+
+hashingTF = HashingTF(inputCol=”words”, outputCol=”features”)
+
+lr = LogisticRegression(maxIter=10, regParam=0.01)
+
+pipeline = Pipeline(stages=[tokenizer, hashingTF, lr])
+Once the pipeline is setup, we can use it to train on a DataFrame directly:
+df = context.load(“/path/to/data”)
+
+model = pipeline.fit(df)
+For more complicated tasks beyond what the machine learning pipeline API provides, applications can also apply arbitrarily complex functions on a DataFrame, which can also be manipulated using Spark’s existing RDD API. The following snippet performs a word count, the “hello world” of big data, on the “bio” column of a DataFrame.
+df = context.load(“/path/to/people.json”)
+RDD-style methods such as map, flatMap are available on DataFrames
+
+Split the bio text into multiple words.
+
+words = df.select(“bio”).flatMap(lambda row: row.bio.split(” “))
+
+Create a new DataFrame to count the number of words
+
+words_df = words.map(lambda w: Row(word=w, cnt=1)).toDF()
+
+word_counts = words_df.groupBy(“word”).sum()
+Under the Hood: Intelligent Optimization and Code Generation
+Unlike the eagerly evaluated data frames in R and Python, DataFrames in Spark have their execution automatically optimized by a query optimizer. Before any computation on a DataFrame starts, the Catalyst optimizer compiles the operations that were used to build the DataFrame into a physical plan for execution. Because the optimizer understands the semantics of operations and structure of the data, it can make intelligent decisions to speed up computation.
+At a high level, there are two kinds of optimizations. First, Catalyst applies logical optimizations such as predicate pushdown. The optimizer can push filter predicates down into the data source, enabling the physical execution to skip irrelevant data. In the case of Parquet files, entire blocks can be skipped and comparisons on strings can be turned into cheaper integer comparisons via dictionary encoding. In the case of relational databases, predicates are pushed down into the external databases to reduce the amount of data traffic.
+Second, Catalyst compiles operations into physical plans for execution and generates JVM bytecode for those plans that is often more optimized than hand-written code. For example, it can choose intelligently between broadcast joins and shuffle joins to reduce network traffic. It can also perform lower level optimizations such as eliminating expensive object allocations and reducing virtual function calls. As a result, we expect performance improvements for existing Spark programs when they migrate to DataFrames.
+Since the optimizer generates JVM bytecode for execution, Python users will experience the same high performance as Scala and Java users.
+ 
+The above chart compares the runtime performance of running group-by-aggregation on 10 million integer pairs on a single machine (source code). Since both Scala and Python DataFrame operations are compiled into JVM bytecode for execution, there is little difference between the two languages, and both outperform the vanilla Python RDD variant by a factor of 5 and Scala RDD variant by a factor of 2.
+DataFrames were inspired by previous distributed data frame efforts, including Adatao’s DDF and Ayasdi’s BigDF. However, the main difference from these projects is that DataFrames go through the Catalyst optimizer, enabling optimized execution similar to that of Spark SQL queries. As we improve the Catalyst optimizer, the engine also becomes smarter, making applications faster with each new release of Spark.
+Our data science team at Databricks has been using this new DataFrame API on our internal data pipelines. It has brought performance improvements to our Spark programs while making them more concise and easier to understand. We are very excited about it and believe it will make big data processing more accessible to a wider array of users.
+This API will be released as part of Spark 1.3 in early March. If you can’t wait, check out Spark from GitHub to try it out. If you are in the Bay Area at the Strata conference, please join us on Feb 17 in San Jose for a meetup on this topic.
+This effort would not have been possible without the prior data frame implementations, and thus we would like to thank the developers of R, Pandas, DDF and BigDF for their work.
+
+Can Hadoop handle small files efficiently ?
+The Hadoop Distributed File System- HDFS is a distributed file system. Hadoop is mainly designed for batch processing of large volume of data. The default Data Block size of HDFS is 128 MB. When file size is significantly smaller than the block size the efficiency degrades.
+Mainly there are two reasons for producing small files:
+•	Files could be the piece of a larger logical file. Since HDFS has only recently supported appends, these unbounded files are saved by writing them in chunks into HDFS.
+•	Another reason is some files cannot be combined together into one larger file and are essentially small. e.g. – A large corpus of images where each image is a distinct file.
+The small size problem is 2 folds. 
+1) Small File problem in HDFS:
+Storing lot of small files which are extremely smaller than the block size cannot be efficiently handled by HDFS. Reading through small files involve lots of seeks and lots of hopping between data node to data node, which is inturn inefficient data processing.
+In namenode’s memory, every file, directory, and the block in HDFS is represented as an object. Each of these objects is in the size of 150 bytes. If we consider 10 Million small files, each of these files will be using a separate block. That will cause to a use of 3 gigabytes of memory. With the hardware limitations have, scaling up beyond this level is a problem. With a lot of files, the memory required to store the metadata is high and can not scale beyond a limit.
+2) Small File problem in MapReduce:
+In MapReduce, Map task process a block of data at a time. Many small files mean lots of blocks – which means lots of tasks, and lots of book keeping by Application Master. This will slow the overall cluster performance compared to large files processing.
+Solution:
+1. HAR files
+2. SequenceFile System
+3. Hbase (If latency is not an issue) and other options as well.
+
+Introducing Window Functions in Spark SQL
+  by Yin Huai and Michael Armbrust Posted in ENGINEERING BLOGJuly 15, 2015
+In this blog post, we introduce the new window function feature that was added in Apache Spark 1.4. Window functions allow users of Spark SQL to calculate results such as the rank of a given row or a moving average over a range of input rows. They significantly improve the expressiveness of Spark’s SQL and DataFrame APIs. This blog will first introduce the concept of window functions and then discuss how to use them with Spark SQL and Spark’s DataFrame API.
+What are Window Functions?
+Before 1.4, there were two kinds of functions supported by Spark SQL that could be used to calculate a single return value. Built-in functions or UDFs, such as substr or round, take values from a single row as input, and they generate a single return value for every input row. Aggregate functions, such as SUM or MAX, operate on a group of rows and calculate a single return value for every group.
+While these are both very useful in practice, there is still a wide range of operations that cannot be expressed using these types of functions alone. Specifically, there was no way to both operate on a group of rows while still returning a single value for every input row. This limitation makes it hard to conduct various data processing tasks like calculating a moving average, calculating a cumulative sum, or accessing the values of a row appearing before the current row. Fortunately for users of Spark SQL, window functions fill this gap.
+At its core, a window function calculates a return value for every input row of a table based on a group of rows, called the Frame. Every input row can have a unique frame associated with it. This characteristic of window functions makes them more powerful than other functions and allows users to express various data processing tasks that are hard (if not impossible) to be expressed without window functions in a concise way. Now, let’s take a look at two examples.
+Suppose that we have a productRevenue table as shown below.
+ 
+We want to answer two questions:
+1.	What are the best-selling and the second best-selling products in every category?
+2.	What is the difference between the revenue of each product and the revenue of the best-selling product in the same category of that product?
+To answer the first question “What are the best-selling and the second best-selling products in every category?”, we need to rank products in a category based on their revenue, and to pick the best selling and the second best-selling products based the ranking. Below is the SQL query used to answer this question by using window function dense_rank (we will explain the syntax of using window functions in next section).
+SELECT
+  product,
+  category,
+  revenue
+FROM (
+  SELECT
+    product,
+    category,
+    revenue,
+    dense_rank() OVER (PARTITION BY category ORDER BY revenue DESC) as rank
+  FROM productRevenue) tmp
+WHERE
+  rank <= 2
+The result of this query is shown below. Without using window functions, it is very hard to express the query in SQL, and even if a SQL query can be expressed, it is hard for the underlying engine to efficiently evaluate the query.
+ 
+For the second question “What is the difference between the revenue of each product and the revenue of the best selling product in the same category as that product?”, to calculate the revenue difference for a product, we need to find the highest revenue value from products in the same category for each product. Below is a Python DataFrame program used to answer this question.
+import sys
+from pyspark.sql.window import Window
+import pyspark.sql.functions as func
+windowSpec = \
+  Window 
+    .partitionBy(df['category']) \
+    .orderBy(df['revenue'].desc()) \
+    .rangeBetween(-sys.maxsize, sys.maxsize)
+dataFrame = sqlContext.table("productRevenue")
+revenue_difference = \
+  (func.max(dataFrame['revenue']).over(windowSpec) - dataFrame['revenue'])
+dataFrame.select(
+  dataFrame['product'],
+  dataFrame['category'],
+  dataFrame['revenue'],
+  revenue_difference.alias("revenue_difference"))
+The result of this program is shown below. Without using window functions, users have to find all highest revenue values of all categories and then join this derived data set with the original productRevenue table to calculate the revenue differences.
+ 
+Using Window Functions
+Spark SQL supports three kinds of window functions: ranking functions, analytic functions, and aggregate functions. The available ranking functions and analytic functions are summarized in the table below. For aggregate functions, users can use any existing aggregate function as a window function.
+	SQL	DataFrame API
+Ranking functions	rank	rank
+	dense_rank	denseRank
+	percent_rank	percentRank
+	ntile	ntile
+	row_number	rowNumber
+Analytic functions	cume_dist	cumeDist
+	first_value	firstValue
+	last_value	lastValue
+	lag	lag
+	lead	lead
+To use window functions, users need to mark that a function is used as a window function by either
+•	Adding an OVER clause after a supported function in SQL, e.g. avg(revenue) OVER (...); or
+•	Calling the over method on a supported function in the DataFrame API, e.g. rank().over(...).
+Once a function is marked as a window function, the next key step is to define the Window Specification associated with this function. A window specification defines which rows are included in the frame associated with a given input row. A window specification includes three parts:
+1.	Partitioning Specification: controls which rows will be in the same partition with the given row. Also, the user might want to make sure all rows having the same value for the category column are collected to the same machine before ordering and calculating the frame.  If no partitioning specification is given, then all data must be collected to a single machine.
+2.	Ordering Specification: controls the way that rows in a partition are ordered, determining the position of the given row in its partition.
+3.	Frame Specification: states which rows will be included in the frame for the current input row, based on their relative position to the current row.  For example, “the three rows preceding the current row to the current row” describes a frame including the current input row and three rows appearing before the current row.
+In SQL, the PARTITION BY and ORDER BY keywords are used to specify partitioning expressions for the partitioning specification, and ordering expressions for the ordering specification, respectively. The SQL syntax is shown below.
+OVER (PARTITION BY ... ORDER BY ...)
+In the DataFrame API, we provide utility functions to define a window specification. Taking Python as an example, users can specify partitioning expressions and ordering expressions as follows.
+from pyspark.sql.window import Window
+windowSpec = \
+  Window \
+    .partitionBy(...) \
+    .orderBy(...)
+In addition to the ordering and partitioning, users need to define the start boundary of the frame, the end boundary of the frame, and the type of the frame, which are three components of a frame specification.
+There are five types of boundaries, which are UNBOUNDED PRECEDING, UNBOUNDED FOLLOWING, CURRENT ROW, <value> PRECEDING, and <value> FOLLOWING. UNBOUNDED PRECEDING and UNBOUNDED FOLLOWING represent the first row of the partition and the last row of the partition, respectively. For the other three types of boundaries, they specify the offset from the position of the current input row and their specific meanings are defined based on the type of the frame. There are two types of frames, ROW frame and RANGEframe.
+ROW frame
+ROW frames are based on physical offsets from the position of the current input row, which means that CURRENT ROW, <value> PRECEDING, or <value> FOLLOWING specifies a physical offset. If CURRENT ROW is used as a boundary, it represents the current input row. <value> PRECEDING and <value> FOLLOWING describes the number of rows appear before and after the current input row, respectively. The following figure illustrates a ROW frame with a 1 PRECEDING as the start boundary and 1 FOLLOWING as the end boundary (ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING in the SQL syntax).
+ 
+RANGE frame
+RANGE frames are based on logical offsets from the position of the current input row, and have similar syntax to the ROW frame. A logical offset is the difference between the value of the ordering expression of the current input row and the value of that same expression of the boundary row of the frame. Because of this definition, when a RANGE frame is used, only a single ordering expression is allowed. Also, for a RANGE frame, all rows having the same value of the ordering expression with the current input row are considered as same row as far as the boundary calculation is concerned.
+Now, let’s take a look at an example. In this example, the ordering expressions is revenue; the start boundary is 2000 PRECEDING; and the end boundary is 1000 FOLLOWING (this frame is defined as RANGE BETWEEN 2000 PRECEDING AND 1000 FOLLOWING in the SQL syntax). The following five figures illustrate how the frame is updated with the update of the current input row. Basically, for every current input row, based on the value of revenue, we calculate the revenue range [current revenue value - 2000, current revenue value + 1000]. All rows whose revenue values fall in this range are in the frame of the current input row.
+ 
+ 
+ 
+ 
+ 
+In summary, to define a window specification, users can use the following syntax in SQL.
+OVER (PARTITION BY ... ORDER BY ... frame_type BETWEEN start AND end)
+Here, frame_type can be either ROWS (for ROW frame) or RANGE (for RANGE frame); startcan be any of UNBOUNDED PRECEDING, CURRENT ROW, <value> PRECEDING, and <value> FOLLOWING; and end can be any of UNBOUNDED FOLLOWING, CURRENT ROW, <value> PRECEDING, and <value> FOLLOWING.
+In the Python DataFrame API, users can define a window specification as follows.
+from pyspark.sql.window import Window
+# Defines partitioning specification and ordering specification.
+windowSpec = \
+  Window \
+    .partitionBy(...) \
+    .orderBy(...)
+# Defines a Window Specification with a ROW frame.
+windowSpec.rowsBetween(start, end)
+# Defines a Window Specification with a RANGE frame.
+windowSpec.rangeBetween(start, end)
+What’s next?
+Since the release of Spark 1.4, we have been actively working with community members on optimizations that improve the performance and reduce the memory consumption of the operator evaluating window functions. Some of these will be added in Spark 1.5, and others will be added in our future releases. Besides performance improvement work, there are two features that we will add in the near future to make window function support in Spark SQL even more powerful. First, we have been working on adding Interval data type support for Date and Timestamp data types (SPARK-8943). With the Interval data type, users can use intervals as values specified in <value> PRECEDING and <value> FOLLOWING for RANGE frame, which makes it much easier to do various time series analysis with window functions. Second, we have been working on adding the support for user-defined aggregate functions in Spark SQL (SPARK-3947). With our window function support, users can immediately use their user-defined aggregate functions as window functions to conduct various advanced data analysis tasks.
+Spark User Defined Functions (UDFs)
+
+Spark let’s you define custom SQL functions called user defined functions (UDFs). UDFs are great when built-in SQL functions aren’t sufficient, but should be used sparingly because they’re not performant.
+This blog post will demonstrate how to define UDFs and will show how to avoid UDFs, when possible, by leveraging native Spark functions.
+Simple UDF example
+Let’s define a UDF that removes all the whitespace and lowercases all the characters in a string.
+def lowerRemoveAllWhitespace(s: String): String = {
+  s.toLowerCase().replaceAll("\\s", "")
+}
+
+val lowerRemoveAllWhitespaceUDF = udf[String, String](lowerRemoveAllWhitespace)
+val sourceDF = spark.createDF(
+  List(
+    ("  HI THERE     "),
+    (" GivE mE PresenTS     ")
+  ), List(
+    ("aaa", StringType, true)
+  )
+)
+
+sourceDF.select(
+  lowerRemoveAllWhitespaceUDF(col("aaa")).as("clean_aaa")
+).show()
++--------------+
+|     clean_aaa|
++--------------+
+|       hithere|
+|givemepresents|
++--------------+
+This code will unfortunately error out if the DataFrame column contains a null value.
+val anotherDF = spark.createDF(
+  List(
+    ("  BOO     "),
+    (" HOO   "),
+    (null)
+  ), List(
+    ("cry", StringType, true)
+  )
+)
+
+anotherDF.select(
+  lowerRemoveAllWhitespaceUDF(col("cry")).as("clean_cry")
+).show()
+org.apache.spark.SparkException: Job aborted due to stage failure: Task 2 in stage 3.0 failed 1 times, most recent failure: Lost task 2.0 in stage 3.0 (TID 7, localhost, executor driver): org.apache.spark.SparkException: Failed to execute user defined function(anonfun$2: (string) => string)
+Caused by: java.lang.NullPointerException
+Cause: org.apache.spark.SparkException: Failed to execute user defined function(anonfun$2: (string) => string)
+Cause: java.lang.NullPointerException
+Let’s write a lowerRemoveAllWhitespaceUDF function that won’t error out when the DataFrame contains null values.
+def betterLowerRemoveAllWhitespace(s: String): Option[String] = {
+  val str = Option(s).getOrElse(return None)
+  Some(str.toLowerCase().replaceAll("\\s", ""))
+}
+
+val betterLowerRemoveAllWhitespaceUDF = udf[Option[String], String](betterLowerRemoveAllWhitespace)
+val anotherDF = spark.createDF(
+  List(
+    ("  BOO     "),
+    (" HOO   "),
+    (null)
+  ), List(
+    ("cry", StringType, true)
+  )
+)
+
+anotherDF.select(
+  betterLowerRemoveAllWhitespaceUDF(col("cry")).as("clean_cry")
+).show()
++---------+
+|clean_cry|
++---------+
+|      boo|
+|      hoo|
+|     null|
++---------+
+We can use the explain() method to demonstrate that UDFs are a black box for the Spark engine.
+== Physical Plan ==
+*Project [UDF(cry#15) AS clean_cry#24]
++- Scan ExistingRDD[cry#15]
+Spark doesn’t know how to convert the UDF into native Spark instructions. Let’s use the native Spark library to refactor this code and help Spark generate a physical plan that can be optimized.
+Using Column Functions
+Let’s define a function that takes a Column argument, returns a Column, and leverages native Spark functions to lowercase and remove all whitespace from a string.
+def bestLowerRemoveAllWhitespace()(col: Column): Column = {
+  lower(regexp_replace(col, "\\s+", ""))
+}
+val anotherDF = spark.createDF(
+  List(
+    ("  BOO     "),
+    (" HOO   "),
+    (null)
+  ), List(
+    ("cry", StringType, true)
+  )
+)
+
+anotherDF.select(
+  bestLowerRemoveAllWhitespace()(col("cry")).as("clean_cry")
+).show()
++---------+
+|clean_cry|
++---------+
+|      boo|
+|      hoo|
+|     null|
++---------+
+Notice that the bestLowerRemoveAllWhitespace elegantly handles the nullcase and does not require us to add any special null logic.
+anotherDF.select(
+  bestLowerRemoveAllWhitespace()(col("cry")).as("clean_cry")
+).explain()
+== Physical Plan ==
+*Project [lower(regexp_replace(cry#29, \s+, )) AS clean_cry#38]
++- Scan ExistingRDD[cry#29]
+Spark can view the internals of the bestLowerRemoveAllWhitespace function and optimize the physical plan accordingly. UDFs are a black box for the Spark engine whereas functions that take a Column argument and return a Columnare not a black box for Spark.
+Conclusion
+Spark UDFs should be avoided whenever possible. If you need to write a UDF, make sure to handle the null case as this is a common cause of errors.
+
+
+Spark groupbyKey vs reduceByKey vs aggregateByKey
+ReduceByKey
+While both reducebykey and groupbykey will produce the same answer, the reduceByKey example works much better on a large dataset. That’s because Spark knows it can combine output with a common key on each partition before shuffling the data.
+On the other hand, when calling groupByKey – all the key-value pairs are shuffled around. This is a lot of unnessary data to being transferred over the network.
+ 
+Syntax:
+1.	sparkContext.textFile("hdfs://")
+2.	
+3.	.flatMap(line => line.split(" "))
+4.	
+5.	.map(word => (word,1))
+6.	
+7.	.reduceByKey((x,y)=> (x+y))
+ 
+Data is combined at each partition , only one output for one key at each partition to send over network. reduceByKey required combining all your values into another value with the exact same type.
+ GroupByKey – groupByKey([numTasks])
+It doesn’t merge the values for the key but directly the shuffle process happens and here lot of data gets sent to each partition, almost same as the initial data.
+And the merging of values for each key is done after the shuffle. Here lot of data stored on final worker node so resulting in out of memory issue.
+ Syntax:
+1.	sparkContext.textFile("hdfs://")
+2.	
+3.	.flatMap(line => line.split(" ") )
+4.	
+5.	.map(word => (word,1))
+6.	
+7.	.groupByKey()
+8.	
+9.	.map((x,y) => (x,sum(y)) )
+ 
+groupByKey can cause out of disk problems as data is sent over the network and collected on the reduce workers
+ AggregateByKey – aggregateByKey(zeroValue)(seqOp, combOp, [numTasks]) It is similar to reduceByKey but you can provide initial values when performing aggregation.
+ same as reduceByKey, which takes an initial value.
+3 parameters as input i. initial value ii. Combiner logic iii. sequence op logic
+1.	val keysWithValuesList = Array("foo=A", "foo=A", "foo=A", "foo=A", "foo=B", "bar=C", "bar=D", "bar=D")
+2.	
+3.	val data = sc.parallelize(keysWithValuesList)
+4.	
+5.	//Create key value pairs
+6.	
+7.	val kv = data.map(_.split("=")).map(v => (v(0), v(1))).cache()
+8.	
+9.	val initialCount = 0;
+10.	
+11.	val addToCounts = (n: Int, v: String) => n + 1
+12.	
+13.	val sumPartitionCounts = (p1: Int, p2: Int) => p1 + p2
+14.	
+15.	val countByKey = kv.aggregateByKey(initialCount)(addToCounts, sumPartitionCounts)
+ 
+ouput: Aggregate By Key sum Results bar -> 3 foo -> 5
+ Comparison between groupByKey, reduceByKey and aggregateByKey
+groupByKey() is just to group your dataset based on a key.
+reduceByKey() is something like grouping + aggregation.
+reduceByKey can be used when we run on large data set.
+reduceByKey when the input and output value types are of same type over aggregateByKey
+aggregateByKey() is logically same as reduceByKey() but it lets you return result in different type. In another words, it lets you have a input as type x and aggregate result as type y. For example (1,2),(1,4) as input and (1,”six”) as output.
+ Summary
+Summary is that when you have an RDD of type (K, V)):
+if you need to keep the values, then use groupByKey
+if you no need to keep the values, but you need to get some aggregated info about each group (items of the original RDD, which have the same K), you have two choices: reduceByKey or aggregateByKey (reduceByKey is kind of particular aggregateByKey)
+if you can provide an operation which take as an input (V, V) and returns V, so that all the values of the group can be reduced to the one single value of the same type, then use reduceByKey. As a result you will have RDD of the same (K, V) type.
+if you can not provide this aggregation operation, then use aggregateByKey. It happens when you reduce values to another type. So you will have (K, V2) as a result
+ 
+References
+ https://databricks.gitbooks.io/databricks-spark-knowledge-base/content/best_practices/prefer_reducebykey_over_groupbykey.html
+ 
+https://stackoverflow.com/questions/43364432/spark-difference-between-reducebykey-vs-groupbykey-vs-aggregatebykey-vs-combineb
+
 Map vs mapPartions
 map works the function being utilized at a per element level while mapPartitions exercises the function at the partition level.
 val newRd = myRdd.mapPartitions(partition => {
@@ -57,6 +1097,13 @@ ORC, Avro and Parquet File Formats
 Space or compression wise I found them pretty close to each other
 Around 10 GB of CSV data compressed to 1.1 GB of ORC with ZLIB compression and same data to 1.2 GB of Parquet GZIP. Both file formats with SNAPPY compression, used around 1.6 GB of space.
 Conversion speed wise ORC was little better it took 9 min where as parquet took 10 plus min.
+
+
+
+
+
+
+
 
 
 
